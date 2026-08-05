@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Portfolio | Tech Horizon</title>
+    <!-- Font Awesome for Modern Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- CORE DESIGN STYLES (Black & Neon Blue Theme) --- */
+        :root {
+            --bg-deep: #05050a;          /* Deepest Black */
+            --bg-surface: #0d0e15;       /* Card/Nav Surface Black */
+            --text-main: #f0f2f5;        /* Off-White Text */
+            --text-muted: #7e8c9a;       /* Muted Steel Gray */
+            --primary-neon: #00d2ff;     /* Vivid Cyber Blue */
+            --primary-glow: rgba(0, 210, 255, 0.15);
+            --primary-dark: #0086a6;     /* Darker Blue for Hovers */
+            --border-glow: #1a2333;       /* Subtle Border */
+            --shadow-glow: 0 0 20px rgba(0, 210, 255, 0.2);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* --- Global Framework Reset --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            background-color: var(--bg-deep);
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* --- Full Window Layout Structure --- */
+        section {
+            padding: 100px 10%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .section-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 60px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+        }
+
+        .section-title span {
+            color: var(--primary-neon);
+            text-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        /* --- Premium Navigation Header --- */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(13, 14, 21, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-glow);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 10%;
+            transition: var(--transition);
+        }
+
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+
+        .logo span {
+            color: var(--primary-neon);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links li {
+            margin-left: 35px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--primary-neon);
+            text-shadow: 0 0 8px var(--primary-glow);
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 1.4rem;
+            cursor: pointer;
+            display: none;
+        }
+
+        /* --- Hero Section UI Graphics --- */
+        #home {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 50px;
+        }
+
+        .home-content {
+            flex: 1.2;
+        }
+
+        .home-content h3 {
+            font-size: 1.4rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .home-content h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 15px;
+        }
+
+        .home-content h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 25px;
+        }
+
+        .typing-text {
+            color: var(--primary-neon);
+            border-right: 3px solid var(--primary-neon);
+            padding-right: 5px;
+            animation: blink 0.75s step-end infinite;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, var(--primary-neon), var(--primary-dark));
+            color: #000;
+            font-weight: 700;
+            text-decoration: none;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary-neon);
+            border: 2px solid var(--primary-neon);
+            margin-left: 15px;
+            box-shadow: none;
+        }
+
+        .btn-outline:hover {
+            background: rgba(0, 210, 255, 0.08);
+            color: var(--primary-neon);
+        }
+
+        .home-img {
+            flex: 0.8;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Neon Graphics Container */
+        .img-graphic-box {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            border-radius: 24px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 20px rgba(0, 210, 255, 0.05);
+        }
+
+        .img-graphic-box::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 26px;
+            background: linear-gradient(135deg, var(--primary-neon), transparent, var(--border-glow));
+            z-index: -1;
+        }
+
+        .img-graphic-box i {
+            font-size: 9rem;
+            color: var(--primary-neon);
+            filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.3));
+        }
+
+        /* --- About & Tech Skills UI --- */
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 60px;
+            align-items: start;
+        }
+
+        .about-text p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+        }
+
+        .skills-container {
+            background-color: var(--bg-surface);
+            padding: 35px;
+            border-radius: 12px;
+            border: 1px solid var(--border-glow);
+        }
+
+        .skill-bar {
+            margin-bottom: 25px;
+        }
+
+        .skill-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .bar-track {
+            width: 100%;
+            height: 8px;
+            background-color: var(--bg-deep);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.02);
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-dark), var(--primary-neon));
+            width: 0; /* Dynamic injection via JS execution */
+            border-radius: 10px;
+            transition: width 1.8s cubic-bezier(0.1, 1, 0.1, 1);
+        }
+
+        /* --- Project Gallery Filter System --- */
+        .filter-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 45px;
+        }
+
+        .filter-btn {
+            padding: 10px 24px;
+            background-color: var(--bg-surface);
+            color: var(--text-muted);
+            border: 1px solid var(--border-glow);
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            transition: var(--transition);
+        }
+
+        .filter-btn.active, .filter-btn:hover {
+            border-color: var(--primary-neon);
+            color: var(--primary-neon);
+            box-shadow: inset 0 0 10px rgba(0, 210, 255, 0.05);
+        }
+
+        .portfolio-matrix {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        .portfolio-item {
+            background-color: var(--bg-surface);
+            border-radius: 8px;
+            border: 1px solid var(--border-glow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .portfolio-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-neon);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .item-visual {
+            height: 220px;
+            background: linear-gradient(135deg, #090a10, #131722);
+            border-bottom: 1px solid var(--border-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .item-visual i {
+            font-size: 4.5rem;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+
+        .portfolio-item:hover .item-visual i {
+            color: var(--primary-neon);
+            filter: drop-shadow(0 0 10px var(--primary-neon));
+        }
+
+        .item-info {
+            padding: 25px;
+        }
+
+        .item-info h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+        }
+
+        .item-info p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* --- Active Contact Infrastructure --- */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 50px;
+        }
+
+        .contact-card {
+            display: flex;
+            align-items: center;
+            background-color: var(--bg-surface);
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid var(--border-glow);
+            margin-bottom: 20px;
+        }
+
+        .contact-card i {
+            font-size: 1.6rem;
+            color: var(--primary-neon);
+            margin-right: 25px;
+            width: 50px;
+            height: 50px;
+            background-color: var(--bg-deep);
+            border: 1px solid var(--border-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        .contact-card h4 {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .contact-card p {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .engine-form {
+            background-color: var(--bg-surface);
+            padding: 40px;
+            border-radius: 8px;
+            border: 1px solid var(--border-glow);
+        }
+
+        .form-row {
+            margin-bottom: 25px;
+        }
+
+        .form-row input, .form-row textarea {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border-glow);
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            border-radius: 4px;
+            outline: none;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-row input:focus, .form-row textarea:focus {
+            border-color: var(--primary-neon);
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.1);
+        }
+
+        /* --- Footer Matrix --- */
+        footer {
+            background-color: var(--bg-surface);
+            text-align: center;
+            padding: 40px 20px;
+            border-top: 1px solid var(--border-glow);
+        }
+
+        .footer-socials a {
+            color: var(--text-muted);
+            font-size: 1.6rem;
+            margin: 0 15px;
+            transition: var(--transition);
+        }
+
+        .footer-socials a:hover {
+            color: var(--primary-neon);
+            text-shadow: 0 0 8px var(--primary-glow);
+        }
+
+        footer p {
+            margin-top: 20px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* --- System Animations --- */
+        @keyframes blink {
+            from, to { border-color: transparent }
+            50% { border-color: var(--primary-neon); }
+        }
+
+        /* --- Device Responsive Engineering --- */
+        @media (max-width: 968px) {
+            header {
+                padding: 20px 5%;
+            }
+            section {
+                padding: 80px 5%;
+            }
+            #home {
+                flex-direction: column-reverse;
+                text-align: center;
+                margin-top: 40px;
+            }
+            .about-grid, .contact-grid {
+                grid-template-columns: 1fr;
+            }
+            .menu-btn {
+                display: block;
+            }
+            .nav-links {
+                position: fixed;
+                top: 73px;
+                right: -100%;
+                width: 280px;
+                height: calc(100vh - 73px);
+                background-color: var(--bg-surface);
+                border-left: 1px solid var(--border-glow);
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 50px;
+                transition: var(--transition);
+            }
+            .nav-links.active {
+                right: 0;
+            }
+            .nav-links li {
+                margin: 25px 0;
+                width: 100%;
+            }
+            .btn-outline {
+                margin-left: 0;
+                margin-top: 15px;
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SYSTEM NAVBAR -->
+    <header>
+        <a href="#home" class="logo">TECH<span>MINDS.</span></a>
+        <ul class="nav-links" id="menuMatrix">
+            <li><a href="#home" class="nav-item active">Home</a></li>
+            <li><a href="#about" class="nav-item">About</a></li>
+            <li><a href="#portfolio" class="nav-item">Projects</a></li>
+            <li><a href="#contact" class="nav-item">Contact</a></li>
+        </ul>
+        <button class="menu-btn" id="toggleMenu"><i class="fas fa-bars"></i></button>
+    </header>
+
+    <!-- HERO / HOME SECTION -->
+    <section id="home">
+        <div class="home-content">
+            <h3>ABOUT ME. // SYSTEM PORTFOLIO</h3>
+            <h1>Tech Pranshu</h1>
+            <h2>Specializing in <span class="typing-text"></span></h2>
+            <p style="margin-bottom: 35px; color: var(--text-muted); max-width: 600px;">Designing and configuring next-generation full-stack architectures. Focused on bringing pristine aesthetics into robust, production-ready system executions.</p>
+            <div>
+                <a href="#contact" class="btn">Initialize Project</a>
+                <a href="CV Resume.jpg" class="btn btn-outline"><i class="fas fa-file-code"></i> Get Technical CV</a>
+            </div>
+        </div>
+        <div class="home-img">
+            <div class="img-graphic-box">
+                <i class="fas fa-terminal"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- METRICS & ABOUT SECTION -->
+    <section id="about">
+        <h2 class="section-title">System <span>Parameters</span></h2>
+        <div class="about-grid">
+            <div class="about-text">
+                <h3>Core Operations</h3>
+                <p style="margin-top: 20px;">I map technical functional specifications into highly responsive operational user matrices. By focusing on modern web protocols, I construct interfaces that respond smoothly under heavy computational environments.</p>
+                <p>Equipped with a comprehensive knowledge base spanning asynchronous asset processing down to hardware-accelerated layouts, I render flawless multi-window digital ecosystems.</p>
+            </div>
+            <div class="skills-container">
+                <div class="skill-bar">
+                    <div class="skill-header"><span>Frontend Architecture</span><span>95%</span></div>
+                    <div class="bar-track"><div class="bar-fill" data-value="95%"></div></div>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-header"><span>System Logic (JS/TS)</span><span>90%</span></div>
+                    <div class="bar-track"><div class="bar-fill" data-value="80%"></div></div>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-header"><span>html/css</span><span>82%</span></div>
+                    <div class="bar-track"><div class="bar-fill" data-value="95%"></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PORTFOLIO / GALLERY SECTION -->
+    <section id="portfolio">
+        <h2 class="section-title">Project <span>Matrix</span></h2>
+        <div class="filter-controls">
+            <button class="filter-btn active" data-filter="all">All Bundles</button>
+            <button class="filter-btn" data-filter="web">Web Architectures</button>
+            <button class="filter-btn" data-filter="design">UI/UX Layouts</button>
+        </div>
+        <div class="portfolio-matrix">
+            <div class="portfolio-item" data-type="web">
+                <div class="item-visual"><i class="fas fa-server"></i></div>
+                <div class="item-info">
+                    <h3>Online Voting System </h3>
+                    <p>Realtime synchronized telemetry stream built using high-performance socket operations.</p>
+                </div>
+                
+            </div>
+            <div class="portfolio-item" data-type="design">
+                <div class="item-visual"><i class="fas fa-layer-group"></i></div>
+                <div class="item-info">
+                     <h3>Online Factory Data Rejection </h3>
+                    <p>Realtime synchronized To Manage Data in Any ORganization and Best Way To Track Factory Process.</p>
+                </div>
+            </div>
+            <div class="portfolio-item" data-type="design">
+                <div class="item-visual"><i class="fas fa-layer-group"></i></div>
+                <div class="item-info">
+                     <h3>Task Management </h3>
+                    <p>Developed a Task Management web application to streamline project tracking and enhance team collaboration. The system allows users to create, assign, prioritize, and monitor tasks in real-time, improving overall productivity and ensuring timely project completion through progress dashboards and automated deadlines..</p>
+                </div>
+            </div>
+            <div class="portfolio-item" data-type="design">
+                <div class="item-visual"><i class="fas fa-layer-group"></i></div>
+                <div class="item-info">
+                    <h3>Dynamic Control Deck</h3>
+                    <p>Immersive dark-mode control grid engineered for maximum monitoring visibility.</p>
+                </div>
+                
+            </div>
+            <div class="portfolio-item" data-type="web">
+                <div class="item-visual"><i class="fas fa-cubes"></i></div>
+                <div class="item-info">
+                    <h3>Cloud Mesh Interface</h3>
+                    <p>A reactive multi-window workspace optimized for cluster node distributions.</p>
+                    
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- COMMUNICATIONS / CONTACT SECTION -->
+    <section id="contact">
+        <h2 class="section-title">CREATE <span> Connection</span></h2>
+        <div class="contact-grid">
+            <div>
+                <div class="contact-card">
+                    <i class="fas fa-terminal"></i>
+                    <div>
+                        <h4>Personal Mail</h4>
+                        <p>pranshu@outlook.com</p>
+                    </div>
+                </div>
+                <div class="contact-card">
+                    <i class="fas fa-satellite"></i>
+                    <div>
+                        <h4>Contact Phone</h4>
+                        <p>+91 8532884450</p>
+                    </div>
+                </div>
+            </div>
+            <form class="engine-form" id="contactEngine">
+                <div class="form-row"><input type="text" id="username" placeholder="Enter Your Name" required></div>
+                <div class="form-row"><input type="email" id="useremail" placeholder="Enter Your Mail" required></div>
+                <div class="form-row"><textarea id="usermessage" rows="5" placeholder="Transmission Details" required></textarea></div>
+                <button type="submit" class="btn">SEND DETAILS</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- SYSTEM FOOTER -->
+    <footer>
+        <div class="footer-socials">
+            <a href="#"><i class="fab fa-github"></i></a>
+            <a href="https://www.linkedin.com/in/prayanshu-kumar-459433268?utm_source=share_via&utm_content=profile&utm_medium=member_android"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#"><i class="fab fa-codepen"></i></a>
+            <a href="https://www.instagram.com/kumar_prayanshu?igsh=MTVwejc3dWlxcmc5cg=="><i class="fab fa-instagram"></i></a>
+        </div>
+        
+        <p>&copy; 2026 TECH PRANSHU // TECH MINDS </p>
+    </footer>
+
+    <!-- INTERACTIVE SCRIPTS -->
+    <script>
+        // --- 1. RESPONSIVE NAVIGATION MENU TRIGGER ---
+        const toggleMenu = document.getElementById('toggleMenu');
+        const menuMatrix = document.getElementById('menuMatrix');
+
+        toggleMenu.addEventListener('click', () => {
+            menuMatrix.classList.toggle('active');
+            toggleMenu.querySelector('i').classList.toggle('fa-bars');
+            toggleMenu.querySelector('i').classList.toggle('fa-xmark');
+        });
+
+        document.querySelectorAll('.nav-item').forEach(link => {
+            link.addEventListener('click', () => {
+                menuMatrix.classList.remove('active');
+                toggleMenu.querySelector('i').className = 'fas fa-bars';
+            });
+        });
+
+        // --- 2. ASYNCHRONOUS ENGINE TYPING EFFECT ---
+        const systemRoles = ["Cloud Systems Design", "Next-Gen UIs", "Interactive Frameworks"];
+        let roleIdx = 0;
+        let charIdx = 0;
+        let deleteMode = false;
+        const targetElement = document.querySelector('.typing-text');
+
+        function executionTypeCycle() {
+            const fullString = systemRoles[roleIdx];
+            if (deleteMode) {
+                targetElement.textContent = fullString.substring(0, charIdx - 1);
+                charIdx--;
+            } else {
+                targetElement.textContent = fullString.substring(0, charIdx + 1);
+                charIdx++;
+            }
+
+            if (!deleteMode && charIdx === fullString.length) {
+                deleteMode = true;
+                setTimeout(executionTypeCycle, 2200);
+            } else if (deleteMode && charIdx === 0) {
+                deleteMode = false;
+                roleIdx = (roleIdx + 1) % systemRoles.length;
+                setTimeout(executionTypeCycle, 400);
+            } else {
+                setTimeout(executionTypeCycle, deleteMode ? 40 : 80);
+            }
+        }
+        window.addEventListener('DOMContentLoaded', () => setTimeout(executionTypeCycle, 800));
+
+        // --- 3. DYNAMIC PROJECT FILTERING MATRIX ---
+        const filterControls = document.querySelectorAll('.filter-btn');
+        const portfolioItems = document.querySelectorAll('.portfolio-item');
+
+        filterControls.forEach(control => {
+            control.addEventListener('click', () => {
+                filterControls.forEach(c => c.classList.remove('active'));
+                control.classList.add('active');
+                
+                const matrixFilter = control.getAttribute('data-filter');
+                
+                portfolioItems.forEach(item => {
+                    if (matrixFilter === 'all' || item.getAttribute('data-type') === matrixFilter) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // --- 4. SCROLL PROGRESS TRACKING & ACTIVE LINK MANAGEMENT ---
+        const viewSections = document.querySelectorAll('section');
+        const menuItems = document.querySelectorAll('.nav-item');
+        const systemBars = document.querySelectorAll('.bar-fill');
+
+        window.addEventListener('scroll', () => {
+            let operationalView = '';
+            viewSections.forEach(sec => {
+                const secTop = sec.offsetTop;
+                const secHeight = sec.clientHeight;
+                if (window.pageYOffset >= (secTop - secHeight / 3)) {
+                    operationalView = sec.getAttribute('id');
+                }
+            });
+
+            menuItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('href').slice(1) === operationalView) {
+                    item.classList.add('active');
+                }
+            });
+
+            // Auto-ignite skill metric progress filling when entering the section
+            if (operationalView === 'about') {
+                systemBars.forEach(bar => {
+                    bar.style.width = bar.getAttribute('data-value');
+                });
+            }
+        });
+
+        // --- 5. SECURE SIMULATED TRANSMISSION FORM PROCESSING ---
+        document.getElementById('contactEngine').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const callerName = document.getElementById('username').value;
+            
+            // Notification response simulation
+            alert(`TRANSMISSION COMPLETION: Thank you, ${callerName}. Signal successfully piped and processed through the system.`);
+            this.reset();
+        });
+    </script>
+</body>
+</html>
