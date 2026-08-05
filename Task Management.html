@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Daily Work Report</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --header-bg: #2d3b8e; 
+            --bg-color: #f4f5f7;
+            --border-color: #e0e0e0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        /* New Top Bar for Dates */
+        .date-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+            padding: 15px 20px;
+        }
+        
+        .date-bar input[type="date"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .controls h3 { margin-top: 0; margin-bottom: 15px;}
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .input-group input[type="time"] {
+            flex: 1;
+            padding: 8px;
+        }
+
+        .input-group input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: var(--header-bg);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover { background-color: #1a2366; }
+        
+        .btn-add { width: 100%; margin-bottom: 15px; }
+        .btn-danger { background-color: #dc3545; }
+        .btn-danger:hover { background-color: #c82333; }
+        .btn-edit { background-color: #ffc107; color: black;}
+        .btn-edit:hover { background-color: #e0a800; }
+        .btn-history { background-color: #17a2b8; }
+        .btn-history:hover { background-color: #138496; }
+        .btn-wa { background-color: #25D366; color: white; flex: 1; }
+        .btn-wa:hover { background-color: #128C7E; }
+        .btn-mail { background-color: #D44638; color: white; flex: 1; }
+        .btn-mail:hover { background-color: #B23121; }
+        .btn-download { background-color: #333; color: white; width: 100%; margin-bottom: 10px;}
+        .btn-clear { background-color: #999; color: white; width: 100%; margin-top: 15px; }
+        .btn-clear:hover { background-color: #777; }
+
+        .share-grid {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .report-wrapper {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .report-header {
+            background-color: var(--header-bg);
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 26px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .report-body {
+            padding: 10px 20px;
+            background-color: white;
+            min-height: 150px;
+        }
+
+        .task-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .task-item {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+            color: #000;
+        }
+
+        .task-item:last-child { border-bottom: none; }
+        .task-content { flex: 1; padding-right: 10px; }
+        .task-actions { display: flex; gap: 5px; }
+        .task-actions button { padding: 5px 10px; font-size: 12px; }
+
+        .report-footer {
+            border-top: 2px solid #333;
+            padding: 15px 20px;
+            font-size: 16px;
+            background: white;
+            color: #000;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #888;
+            padding: 20px 0;
+            font-style: italic;
+        }
+
+        /* Modals */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Image Download Modal */
+        #generated-image {
+            max-width: 100%;
+            max-height: 60vh;
+            border: 3px solid white;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        /* History Modal */
+        .history-box {
+            background: white;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 8px;
+            padding: 20px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .history-box h2 {
+            margin-top: 0;
+            text-align: center;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-text {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .btn-force-download { background-color: #28a745; font-size: 16px; padding: 12px 25px; }
+        .btn-close-modal { background-color: #dc3545; font-size: 16px; padding: 12px 25px; }
+        .btn-close-history { width: 100%; margin-top: 15px; background-color: #333; }
+
+    </style>
+</head>
+<body>
+
+    <!-- NEW: Date Selector and History Bar -->
+    <div class="controls date-bar">
+        <div>
+            <label for="report-date" style="font-size: 14px; color: #555;">Date: </label>
+            <input type="date" id="report-date" onchange="changeDate(this.value)">
+        </div>
+        <button class="btn-history" onclick="openHistory()">📂 View History</button>
+    </div>
+
+    <div class="controls" id="input-controls">
+        <h3>Add Work Entry</h3>
+        <div class="input-group">
+            <input type="time" id="start-time" required>
+            <input type="time" id="end-time" required>
+        </div>
+        <input type="text" id="task-desc" placeholder="Work description (e.g., CNC FPA, Lunch Break)" required>
+        
+        <input type="hidden" id="edit-index" value="-1">
+        <button id="save-btn" class="btn-add" onclick="saveTask()">Add Task</button>
+
+        <div class="share-grid">
+            <button class="btn-download" onclick="generateImage()">📷 Create & Download Image</button>
+            <button class="btn-wa" onclick="shareWhatsApp()">💬 Share Text to WhatsApp</button>
+            <button class="btn-mail" onclick="shareEmail()">✉️ Share Text via Email</button>
+        </div>
+
+        <button class="btn-clear" onclick="clearDailyData()">🗑️ Clear Tasks for this Day</button>
+    </div>
+
+    <div class="report-wrapper" id="capture-area">
+        <div class="report-header">
+            MY WORK REPORT
+        </div>
+        <div class="report-body">
+            <ul class="task-list" id="task-list"></ul>
+        </div>
+        <div class="report-footer" id="date-footer"></div>
+    </div>
+
+    <!-- Image Display Modal -->
+    <div id="image-modal" class="modal-overlay">
+        <div class="modal-text">Tap the image or use the green button to download!</div>
+        <img id="generated-image" src="" alt="Your Work Report" onclick="triggerDownload()">
+        
+        <div class="modal-actions">
+            <button class="btn-force-download" onclick="triggerDownload()">⬇️ Download</button>
+            <button class="btn-close-modal" onclick="closeImageModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- History Vault Modal -->
+    <div id="history-modal" class="modal-overlay">
+        <div class="history-box">
+            <h2>Archived Reports</h2>
+            <div id="history-list">
+                <!-- Past dates will populate here -->
+            </div>
+            <button class="btn-close-history" onclick="closeHistory()">Close History</button>
+        </div>
+    </div>
+
+    <script>
+        let allReports = {}; // Database containing all dates
+        let currentDate = ""; // The currently selected date (YYYY-MM-DD)
+        let tasks = []; // Tasks for the currently selected date
+        let currentBlobUrl = null;
+
+        // --- NEW: App Initialization & Date Management ---
+        function initApp() {
+            // Get today's date adjusted for local timezone
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            currentDate = `${year}-${month}-${day}`;
+            
+            // Load full database from memory
+            const savedData = localStorage.getItem('daily_work_database');
+            if (savedData) {
+                allReports = JSON.parse(savedData);
+            }
+
+            document.getElementById('report-date').value = currentDate;
+            loadTasksForDate(currentDate);
+        }
+
+        function changeDate(newDate) {
+            if (!newDate) return;
+            currentDate = newDate;
+            document.getElementById('report-date').value = currentDate;
+            loadTasksForDate(currentDate);
+        }
+
+        function loadTasksForDate(dateStr) {
+            // Pull tasks for this specific date, or default to empty array
+            tasks = allReports[dateStr] || [];
+            updateDateFooter(dateStr);
+            renderTasks();
+            
+            // Reset edit mode if active
+            document.getElementById('edit-index').value = "-1";
+            document.getElementById('save-btn').innerText = "Add Task";
+        }
+
+        function saveDataLocally() {
+            if (tasks.length > 0) {
+                allReports[currentDate] = tasks;
+            } else {
+                // If all tasks are deleted, remove the date from the database to keep it clean
+                delete allReports[currentDate]; 
+            }
+            localStorage.setItem('daily_work_database', JSON.stringify(allReports));
+        }
+
+        function updateDateFooter(dateStr) {
+            // Format YYYY-MM-DD back to readable string like "Thursday, July 23, 2026"
+            const parts = dateStr.split('-');
+            const dateObj = new Date(parts[0], parts[1] - 1, parts[2]); 
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const formatted = dateObj.toLocaleDateString('en-US', options);
+            document.getElementById('date-footer').innerText = `Date and Day: ${formatted}`;
+        }
+
+        // --- History Modal Logic ---
+        function openHistory() {
+            const listContainer = document.getElementById('history-list');
+            listContainer.innerHTML = '';
+
+            // Get all dates in database and sort them newest to oldest
+            const dates = Object.keys(allReports).sort((a, b) => b.localeCompare(a));
+
+            if (dates.length === 0) {
+                listContainer.innerHTML = '<div class="empty-state">No saved reports found.</div>';
+            } else {
+                dates.forEach(dateStr => {
+                    const taskCount = allReports[dateStr].length;
+                    
+                    const div = document.createElement('div');
+                    div.className = 'history-item';
+                    div.innerHTML = `
+                        <div>
+                            <strong>${dateStr}</strong><br>
+                            <small style="color:#666;">${taskCount} tasks</small>
+                        </div>
+                        <button onclick="loadFromHistory('${dateStr}')">Load</button>
+                    `;
+                    listContainer.appendChild(div);
+                });
+            }
+            document.getElementById('history-modal').style.display = 'flex';
+        }
+
+        function loadFromHistory(dateStr) {
+            closeHistory();
+            changeDate(dateStr);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function closeHistory() {
+            document.getElementById('history-modal').style.display = 'none';
+        }
+
+        // --- Existing Core Logic ---
+        function formatTime(time24) {
+            if (!time24) return '';
+            let [hours, minutes] = time24.split(':');
+            hours = parseInt(hours);
+            if (hours === 0) hours = 12;
+            else if (hours > 12) hours = hours - 12;
+            return `${hours}:${minutes}`;
+        }
+
+        function renderTasks() {
+            const list = document.getElementById('task-list');
+            list.innerHTML = '';
+
+            if (tasks.length === 0) {
+                list.innerHTML = '<div class="empty-state">No tasks logged for this day.</div>';
+                return;
+            }
+
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.className = 'task-item';
+                const timeString = `${formatTime(task.start)} to ${formatTime(task.end)}`;
+                
+                li.innerHTML = `
+                    <div class="task-content">${timeString} - ${task.desc}</div>
+                    <div class="task-actions action-btns">
+                        <button class="btn-edit" onclick="editTask(${index})">Edit</button>
+                        <button class="btn-danger" onclick="deleteTask(${index})">Del</button>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function saveTask() {
+            const start = document.getElementById('start-time').value;
+            const end = document.getElementById('end-time').value;
+            const desc = document.getElementById('task-desc').value;
+            const editIndex = document.getElementById('edit-index').value;
+
+            if (!start || !end || !desc) {
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            const newTask = { start, end, desc };
+
+            if (editIndex === "-1") {
+                tasks.push(newTask);
+            } else {
+                tasks[parseInt(editIndex)] = newTask;
+                document.getElementById('edit-index').value = "-1";
+                document.getElementById('save-btn').innerText = "Add Task";
+            }
+
+            document.getElementById('start-time').value = '';
+            document.getElementById('end-time').value = '';
+            document.getElementById('task-desc').value = '';
+            
+            saveDataLocally(); 
+            renderTasks();
+        }
+
+        function editTask(index) {
+            const task = tasks[index];
+            document.getElementById('start-time').value = task.start;
+            document.getElementById('end-time').value = task.end;
+            document.getElementById('task-desc').value = task.desc;
+            document.getElementById('edit-index').value = index;
+            document.getElementById('save-btn').innerText = "Update Task";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function deleteTask(index) {
+            if(confirm("Are you sure you want to delete this entry?")) {
+                tasks.splice(index, 1);
+                saveDataLocally(); 
+                renderTasks();
+            }
+        }
+
+        function clearDailyData() {
+            if(confirm(`Are you sure you want to clear ALL tasks for ${currentDate}?`)) {
+                tasks = [];
+                saveDataLocally();
+                renderTasks();
+            }
+        }
+
+        // --- Image & Sharing Logic ---
+        async function generateImage() {
+            if (tasks.length === 0) return alert("Please add at least one task before creating the image.");
+            
+            const actionBtns = document.querySelectorAll('.action-btns');
+            actionBtns.forEach(btn => btn.style.display = 'none');
+
+            const reportElement = document.getElementById('capture-area');
+            const canvas = await html2canvas(reportElement, { scale: 2, backgroundColor: "#ffffff" });
+
+            actionBtns.forEach(btn => btn.style.display = 'flex');
+
+            canvas.toBlob((blob) => {
+                if (currentBlobUrl) { URL.revokeObjectURL(currentBlobUrl); } 
+                currentBlobUrl = URL.createObjectURL(blob);
+                document.getElementById('generated-image').src = currentBlobUrl;
+                document.getElementById('image-modal').style.display = 'flex';
+            }, "image/png");
+        }
+
+        function triggerDownload() {
+            if (!currentBlobUrl) return;
+            const link = document.createElement('a');
+            link.href = currentBlobUrl;
+            link.download = `Work_Report_${currentDate}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function closeImageModal() {
+            document.getElementById('image-modal').style.display = 'none';
+        }
+
+        function getReportText() {
+            let text = "*MY WORK REPORT*\n";
+            text += document.getElementById('date-footer').innerText + "\n\n";
+            tasks.forEach(t => {
+                text += `${formatTime(t.start)} to ${formatTime(t.end)} - ${t.desc}\n`;
+            });
+            return encodeURIComponent(text);
+        }
+
+        function shareWhatsApp() {
+            if (tasks.length === 0) return alert("Please add at least one task before sharing.");
+            window.open(`https://wa.me/?text=${getReportText()}`, '_blank');
+        }
+
+        function shareEmail() {
+            if (tasks.length === 0) return alert("Please add at least one task before sharing.");
+            window.location.href = `mailto:?subject=Work Report - ${currentDate}&body=${getReportText()}`;
+        }
+
+        // Boot up the App
+        initApp();
+    </script>
+</body>
+</html>

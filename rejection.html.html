@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factory Rejection Tracker</title>
+    <style>
+        /* --- CSS Styling --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 950px;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #333;
+            border-bottom: 2px solid #0056b3;
+            padding-bottom: 10px;
+            margin-top: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+            font-size: 14px;
+        }
+
+        input, select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #0056b3;
+        }
+        
+        /* Styling for read-only auto-calculated fields */
+        input[readonly] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+            color: #495057;
+            font-weight: bold;
+        }
+
+        button {
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background-color: #0056b3;
+            width: 100%;
+        }
+        .btn-primary:hover { background-color: #004494; }
+        
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529;
+            width: 100%;
+        }
+        .btn-warning:hover { background-color: #e0a800; }
+
+        .btn-download {
+            background-color: #17a2b8;
+            flex: 1;
+        }
+        .btn-download:hover { background-color: #138496; }
+
+        .btn-success {
+            background-color: #28a745;
+            flex: 1;
+        }
+        .btn-success:hover { background-color: #218838; }
+
+        .btn-danger {
+            background-color: #dc3545;
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+        .btn-danger:hover { background-color: #c82333; }
+
+        /* Style for the individual row buttons */
+        .row-action-group {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .btn-delete-row {
+            background-color: #dc3545;
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 4px;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-delete-row:hover { background-color: #c82333; }
+
+        .btn-edit-row {
+            background-color: #ffc107;
+            padding: 5px 10px;
+            font-size: 12px;
+            border-radius: 4px;
+            color: #212529;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-edit-row:hover { background-color: #e0a800; }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        /* Center the action column */
+        th.action-col, td.action-col {
+            text-align: center;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #777;
+            font-style: italic;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Enter / Edit Rejection Data</h2>
+        <div class="form-grid">
+            
+            <div class="form-group">
+                <label for="trackingDate">Date (Auto-updates):</label>
+                <input type="date" id="trackingDate" required>
+            </div>
+
+            <div class="form-group">
+                <label for="department">Department:</label>
+                <input type="text" id="department" placeholder="Enter department name">
+            </div>
+
+            <div class="form-group">
+                <label for="partName">Part Name / Number:</label>
+                <input type="text" id="partName" placeholder="e.g., Gearbox A12">
+            </div>
+
+            <div class="form-group">
+                <label for="defectType">Defect Type:</label>
+                <input type="text" id="defectType" placeholder="Enter defect description">
+            </div>
+
+            <div class="form-group">
+                <label for="okQty">OK Quantity:</label>
+                <input type="number" id="okQty" min="0" placeholder="0" oninput="calculateTotal()">
+            </div>
+
+            <div class="form-group">
+                <label for="rejQty">Rejected Quantity:</label>
+                <input type="number" id="rejQty" min="0" placeholder="0" oninput="calculateTotal()">
+            </div>
+            
+            <div class="form-group full-width">
+                <label for="totalQty">Total Quantity:</label>
+                <input type="number" id="totalQty" readonly placeholder="Auto-calculated sum of OK and Rejected">
+            </div>
+
+            <div class="form-group full-width">
+                <label for="defectImages">Upload Defect Images (Multiple allowed):</label>
+                <input type="file" id="defectImages" multiple accept="image/*">
+                <small style="color: #666; margin-top: 5px;">Images stay on your computer until you manually attach them to the email.</small>
+            </div>
+
+            <div class="form-group full-width">
+                <button type="button" id="saveButton" class="btn-primary" onclick="saveRecord()">+ Save to Current List</button>
+            </div>
+            
+        </div>
+    </div>
+
+    <div class="container">
+        <h3>
+            Saved Records
+            <button type="button" class="btn-danger" onclick="clearAllData()">🗑 Clear All Data</button>
+        </h3>
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Dept</th>
+                    <th>Part</th>
+                    <th>Defect</th>
+                    <th>Total Qty</th>
+                    <th>OK Qty</th>
+                    <th>Rej Qty</th>
+                    <th>Rej %</th>
+                    <th class="action-col">Action</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr>
+                    <td colspan="9" class="empty-message">No records added yet.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="action-buttons">
+            <button type="button" class="btn-download" onclick="downloadDataFiles()">⬇ Download Data (.csv)</button>
+            <button type="button" class="btn-success" onclick="shareViaMail()">✉ Share via Mail</button>
+        </div>
+    </div>
+
+    <script>
+        /* --- JavaScript Functionality --- */
+        
+        let records = JSON.parse(localStorage.getItem('factoryRecords')) || [];
+        let editIndex = -1; // Added variable to track if we are editing an existing record
+
+        window.onload = function() {
+            document.getElementById('trackingDate').valueAsDate = new Date();
+            updateTable(); 
+        };
+
+        function calculateTotal() {
+            const ok = parseInt(document.getElementById('okQty').value) || 0;
+            const rej = parseInt(document.getElementById('rejQty').value) || 0;
+            document.getElementById('totalQty').value = ok + rej;
+        }
+
+        // Updated addRecord to saveRecord to handle both Add and Edit
+        function saveRecord() {
+            const date = document.getElementById('trackingDate').value;
+            const department = document.getElementById('department').value;
+            const partName = document.getElementById('partName').value;
+            const defectType = document.getElementById('defectType').value;
+            const okQty = parseInt(document.getElementById('okQty').value) || 0;
+            const rejQty = parseInt(document.getElementById('rejQty').value) || 0;
+            const totalQty = okQty + rejQty; 
+
+            if(!department || !partName || !defectType || document.getElementById('okQty').value === '' || document.getElementById('rejQty').value === '') {
+                alert("Please fill in all text fields and quantities.");
+                return;
+            }
+
+            let rejPercent = "0.00%";
+            if (totalQty > 0) {
+                rejPercent = ((rejQty / totalQty) * 100).toFixed(2) + "%";
+            }
+
+            const recordData = { date, department, partName, defectType, totalQty, okQty, rejQty, rejPercent };
+
+            if (editIndex > -1) {
+                // Update existing record
+                records[editIndex] = recordData;
+                editIndex = -1; // Reset edit mode
+                
+                // Reset button style
+                const saveBtn = document.getElementById('saveButton');
+                saveBtn.textContent = "+ Save to Current List";
+                saveBtn.className = "btn-primary";
+            } else {
+                // Add new record
+                records.push(recordData);
+            }
+
+            localStorage.setItem('factoryRecords', JSON.stringify(records));
+            updateTable();
+
+            // Clear form
+            document.getElementById('department').value = '';
+            document.getElementById('partName').value = '';
+            document.getElementById('defectType').value = '';
+            document.getElementById('okQty').value = '';
+            document.getElementById('rejQty').value = '';
+            document.getElementById('totalQty').value = '';
+            document.getElementById('trackingDate').valueAsDate = new Date();
+            document.getElementById('department').focus();
+        }
+
+        // NEW FUNCTION: Populate the form with the selected record's data for editing
+        function editSpecificRecord(index) {
+            const record = records[index];
+            
+            document.getElementById('trackingDate').value = record.date;
+            document.getElementById('department').value = record.department;
+            document.getElementById('partName').value = record.partName;
+            document.getElementById('defectType').value = record.defectType;
+            document.getElementById('okQty').value = record.okQty;
+            document.getElementById('rejQty').value = record.rejQty;
+            calculateTotal(); // Recalculate total to update the readonly field
+
+            editIndex = index; // Set global variable to know which row is being updated
+
+            // Update button visual to show edit mode
+            const saveBtn = document.getElementById('saveButton');
+            saveBtn.textContent = "✎ Update Record";
+            saveBtn.className = "btn-warning";
+            
+            // Scroll smoothly to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = ''; 
+
+            if (records.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="empty-message">No records added yet.</td></tr>';
+                return;
+            }
+
+            records.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                // Added an edit button to the table row
+                tr.innerHTML = `
+                    <td>${row.date}</td>
+                    <td>${row.department}</td>
+                    <td>${row.partName}</td>
+                    <td>${row.defectType}</td>
+                    <td>${row.totalQty}</td>
+                    <td>${row.okQty}</td>
+                    <td>${row.rejQty}</td>
+                    <td style="font-weight: bold; color: ${parseFloat(row.rejPercent) > 5 ? 'red' : 'green'};">${row.rejPercent}</td>
+                    <td class="action-col">
+                        <div class="row-action-group">
+                            <button type="button" class="btn-edit-row" title="Edit Row" onclick="editSpecificRecord(${index})">✎</button>
+                            <button type="button" class="btn-delete-row" title="Delete Row" onclick="deleteSpecificRecord(${index})">✖</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function deleteSpecificRecord(index) {
+            if (confirm("Are you sure you want to delete this specific record?")) {
+                records.splice(index, 1);
+                
+                // If user deleted the record they were currently editing, reset the form
+                if (editIndex === index) {
+                    editIndex = -1;
+                    document.getElementById('saveButton').textContent = "+ Save to Current List";
+                    document.getElementById('saveButton').className = "btn-primary";
+                    document.getElementById('department').value = '';
+                    document.getElementById('partName').value = '';
+                    document.getElementById('defectType').value = '';
+                    document.getElementById('okQty').value = '';
+                    document.getElementById('rejQty').value = '';
+                    document.getElementById('totalQty').value = '';
+                } else if (editIndex > index) {
+                    // Shift the edit index if a row above it was deleted
+                    editIndex--;
+                }
+
+                localStorage.setItem('factoryRecords', JSON.stringify(records));
+                updateTable();
+            }
+        }
+
+        function clearAllData() {
+            if (confirm("Are you sure you want to delete ALL saved records? This cannot be undone.")) {
+                records = [];
+                localStorage.removeItem('factoryRecords');
+                editIndex = -1;
+                document.getElementById('saveButton').textContent = "+ Save to Current List";
+                document.getElementById('saveButton').className = "btn-primary";
+                updateTable();
+            }
+        }
+
+        function downloadDataFiles() {
+            if (records.length === 0) {
+                alert("No records to download. Please add data first.");
+                return;
+            }
+
+            let csvContent = "Date,Department,Part Name,Defect Type,Total Qty,OK Qty,Rejected Qty,Rejection %\n";
+            
+            records.forEach(row => {
+                csvContent += `${row.date},"${row.department}","${row.partName}","${row.defectType}",${row.totalQty},${row.okQty},${row.rejQty},${row.rejPercent}\n`;
+            });
+
+            const fileName = `Factory_Rejection_Data_${new Date().toISOString().split('T')[0]}.csv`;
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+            if (navigator.canShare && navigator.canShare({ files: [new File([blob], fileName, { type: 'text/csv' })] })) {
+                const file = new File([blob], fileName, { type: 'text/csv' });
+                navigator.share({
+                    title: 'Factory Rejection Data',
+                    files: [file]
+                }).catch(err => console.log("Share cancelled or failed:", err));
+            } else {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", fileName);
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        function shareViaMail() {
+            if (records.length === 0) {
+                alert("No records to share. Please add data first.");
+                return;
+            }
+
+            let summaryText = "Date | Dept | Part | Defect | Total | OK | Rej | Rej %\n";
+            summaryText += "------------------------------------------------------------------\n";
+            
+            records.forEach(row => {
+                summaryText += `${row.date} | ${row.department} | ${row.partName} | ${row.defectType} | ${row.totalQty} | ${row.okQty} | ${row.rejQty} | ${row.rejPercent}\n`;
+            });
+
+            const emailSubject = encodeURIComponent(`Factory Rejection Data Report`);
+            const emailBody = encodeURIComponent(
+                `Hello,\n\n` +
+                `Please find the latest rejection data summary below:\n\n` +
+                `${summaryText}\n\n` +
+                `[Note: Please find any required CSV data files or Defect Images attached.]\n\n` +
+                `Regards,\n[Your Name]`
+            );
+
+            window.location.href = `mailto:manager@factory.com?subject=${emailSubject}&body=${emailBody}`;
+        }
+    </script>
+</body>
+</html>
