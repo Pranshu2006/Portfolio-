@@ -22,7 +22,7 @@
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 950px;
+            max-width: 1100px;
             margin-bottom: 20px;
         }
 
@@ -70,7 +70,6 @@
             border-color: #0056b3;
         }
         
-        /* Styling for read-only auto-calculated fields */
         input[readonly] {
             background-color: #e9ecef;
             cursor: not-allowed;
@@ -89,75 +88,44 @@
             font-weight: bold;
         }
 
-        .btn-primary {
-            background-color: #0056b3;
-            width: 100%;
-        }
+        .btn-primary { background-color: #0056b3; width: 100%; }
         .btn-primary:hover { background-color: #004494; }
         
-        .btn-warning {
-            background-color: #ffc107;
-            color: #212529;
-            width: 100%;
-        }
+        .btn-warning { background-color: #ffc107; color: #212529; width: 100%; }
         .btn-warning:hover { background-color: #e0a800; }
 
-        .btn-download {
-            background-color: #17a2b8;
-            flex: 1;
-        }
-        .btn-download:hover { background-color: #138496; }
+        .btn-download-xls { background-color: #17a2b8; flex: 1; }
+        .btn-download-xls:hover { background-color: #138496; }
 
-        .btn-success {
-            background-color: #28a745;
-            flex: 1;
-        }
+        .btn-download-csv { background-color: #6c757d; flex: 1; }
+        .btn-download-csv:hover { background-color: #5a6268; }
+
+        .btn-success { background-color: #28a745; flex: 1; }
         .btn-success:hover { background-color: #218838; }
 
-        .btn-danger {
-            background-color: #dc3545;
-            padding: 8px 12px;
-            font-size: 12px;
-        }
+        .btn-danger { background-color: #dc3545; padding: 8px 12px; font-size: 12px; }
         .btn-danger:hover { background-color: #c82333; }
+        
+        .btn-secondary { background-color: #6c757d; padding: 8px 12px; font-size: 13px; }
+        .btn-secondary:hover { background-color: #5a6268; }
 
-        /* Style for the individual row buttons */
         .row-action-group {
             display: flex;
             gap: 5px;
             justify-content: center;
         }
 
-        .btn-delete-row {
-            background-color: #dc3545;
-            padding: 5px 10px;
-            font-size: 12px;
-            border-radius: 4px;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        .btn-delete-row:hover { background-color: #c82333; }
-
-        .btn-edit-row {
-            background-color: #ffc107;
-            padding: 5px 10px;
-            font-size: 12px;
-            border-radius: 4px;
-            color: #212529;
-            border: none;
-            cursor: pointer;
-        }
-        .btn-edit-row:hover { background-color: #e0a800; }
+        .btn-delete-row { background-color: #dc3545; padding: 5px 10px; font-size: 12px; border-radius: 4px; color: white; border: none; cursor: pointer; }
+        .btn-edit-row { background-color: #ffc107; padding: 5px 10px; font-size: 12px; border-radius: 4px; color: #212529; border: none; cursor: pointer; }
 
         .action-buttons {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             margin-top: 20px;
             width: 100%;
+            flex-wrap: wrap;
         }
 
-        /* Table Styling */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -169,6 +137,7 @@
             border: 1px solid #ddd;
             padding: 10px;
             text-align: left;
+            vertical-align: middle;
         }
 
         th {
@@ -176,114 +145,167 @@
             color: #333;
         }
 
-        /* Center the action column */
-        th.action-col, td.action-col {
-            text-align: center;
+        th.action-col, td.action-col { text-align: center; }
+
+        .empty-message { text-align: center; color: #777; font-style: italic; padding: 20px; }
+        
+        /* Different background colors to distinguish Daily vs Monthly sections */
+        .daily-box { background-color: #fdfbf7; border: 1px solid #e2d9c8; }
+        .monthly-box { background-color: #f4f7f9; border: 1px solid #d1dbe0; }
+
+        .thumbnail {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            margin-right: 5px;
+            cursor: pointer;
         }
 
-        .empty-message {
-            text-align: center;
-            color: #777;
-            font-style: italic;
-            padding: 20px;
+        .filter-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
         }
     </style>
 </head>
 <body>
 
+    <!-- INPUT FORM -->
     <div class="container">
         <h2>Enter / Edit Rejection Data</h2>
         <div class="form-grid">
-            
             <div class="form-group">
                 <label for="trackingDate">Date (Auto-updates):</label>
                 <input type="date" id="trackingDate" required>
             </div>
-
             <div class="form-group">
                 <label for="department">Department:</label>
                 <input type="text" id="department" placeholder="Enter department name">
             </div>
-
             <div class="form-group">
                 <label for="partName">Part Name / Number:</label>
                 <input type="text" id="partName" placeholder="e.g., Gearbox A12">
             </div>
-
             <div class="form-group">
                 <label for="defectType">Defect Type:</label>
                 <input type="text" id="defectType" placeholder="Enter defect description">
             </div>
-
             <div class="form-group">
                 <label for="okQty">OK Quantity:</label>
                 <input type="number" id="okQty" min="0" placeholder="0" oninput="calculateTotal()">
             </div>
-
             <div class="form-group">
                 <label for="rejQty">Rejected Quantity:</label>
                 <input type="number" id="rejQty" min="0" placeholder="0" oninput="calculateTotal()">
             </div>
-            
             <div class="form-group full-width">
                 <label for="totalQty">Total Quantity:</label>
                 <input type="number" id="totalQty" readonly placeholder="Auto-calculated sum of OK and Rejected">
             </div>
-
             <div class="form-group full-width">
                 <label for="defectImages">Upload Defect Images (Multiple allowed):</label>
                 <input type="file" id="defectImages" multiple accept="image/*">
-                <small style="color: #666; margin-top: 5px;">Images stay on your computer until you manually attach them to the email.</small>
             </div>
-
             <div class="form-group full-width">
-                <button type="button" id="saveButton" class="btn-primary" onclick="saveRecord()">+ Save to Current List</button>
+                <button type="button" id="saveButton" class="btn-primary" onclick="handleSaveRecord()">+ Save Record</button>
             </div>
-            
         </div>
     </div>
 
-    <div class="container">
-        <h3>
-            Saved Records
-            <button type="button" class="btn-danger" onclick="clearAllData()">🗑 Clear All Data</button>
-        </h3>
-        <table id="dataTable">
+    <!-- DAILY DETAILED RECORDS -->
+    <div class="container daily-box">
+        <div class="filter-header">
+            <label for="dayFilter"><strong>📅 Filter Daily Records:</strong></label>
+            <input type="date" id="dayFilter" onchange="updateTables()">
+            <button type="button" class="btn-secondary" onclick="clearFilter('day')">Clear Date Filter</button>
+        </div>
+        
+        <h3><span id="dailyTableTitle">Daily Detailed Records</span></h3>
+        <table id="dailyTable">
             <thead>
                 <tr>
                     <th>Date</th>
                     <th>Dept</th>
                     <th>Part</th>
                     <th>Defect</th>
-                    <th>Total Qty</th>
-                    <th>OK Qty</th>
-                    <th>Rej Qty</th>
+                    <th>Total</th>
+                    <th>OK</th>
+                    <th>Rej</th>
                     <th>Rej %</th>
+                    <th>Images</th>
                     <th class="action-col">Action</th>
                 </tr>
             </thead>
-            <tbody id="tableBody">
-                <tr>
-                    <td colspan="9" class="empty-message">No records added yet.</td>
-                </tr>
+            <tbody id="dailyTableBody">
+                <tr><td colspan="10" class="empty-message">No records found.</td></tr>
             </tbody>
         </table>
 
         <div class="action-buttons">
-            <button type="button" class="btn-download" onclick="downloadDataFiles()">⬇ Download Data (.csv)</button>
-            <button type="button" class="btn-success" onclick="shareViaMail()">✉ Share via Mail</button>
+            <button type="button" class="btn-download-xls" onclick="downloadExcelFile('daily')">📊 Download Daily Excel (Images)</button>
+            <button type="button" class="btn-download-csv" onclick="downloadCSVFile('daily')">📄 Download Daily CSV (Text)</button>
+            <button type="button" class="btn-success" onclick="shareViaMail('daily')">✉ Share Daily Mail</button>
+        </div>
+    </div>
+
+    <!-- MONTHLY DETAILED RECORDS -->
+    <div class="container monthly-box">
+        <div class="filter-header">
+            <label for="monthFilter"><strong>📅 Filter Monthly Records:</strong></label>
+            <input type="month" id="monthFilter" onchange="updateTables()">
+            <button type="button" class="btn-secondary" onclick="clearFilter('month')">Clear Month Filter</button>
+        </div>
+        
+        <h3>
+            <span id="monthlyTableTitle">Monthly Detailed Records</span>
+            <button type="button" class="btn-danger" onclick="clearAllData()">🗑 Clear ALL Data</button>
+        </h3>
+        <table id="monthlyTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Dept</th>
+                    <th>Part</th>
+                    <th>Defect</th>
+                    <th>Total</th>
+                    <th>OK</th>
+                    <th>Rej</th>
+                    <th>Rej %</th>
+                    <th>Images</th>
+                    <th class="action-col">Action</th>
+                </tr>
+            </thead>
+            <tbody id="monthlyTableBody">
+                <tr><td colspan="10" class="empty-message">No records found.</td></tr>
+            </tbody>
+        </table>
+
+        <div class="action-buttons">
+            <button type="button" class="btn-download-xls" onclick="downloadExcelFile('monthly')">📊 Download Monthly Excel (Images)</button>
+            <button type="button" class="btn-download-csv" onclick="downloadCSVFile('monthly')">📄 Download Monthly CSV (Text)</button>
+            <button type="button" class="btn-success" onclick="shareViaMail('monthly')">✉ Share Monthly Mail</button>
         </div>
     </div>
 
     <script>
         /* --- JavaScript Functionality --- */
-        
         let records = JSON.parse(localStorage.getItem('factoryRecords')) || [];
-        let editIndex = -1; // Added variable to track if we are editing an existing record
+        let editIndex = -1; 
 
         window.onload = function() {
-            document.getElementById('trackingDate').valueAsDate = new Date();
-            updateTable(); 
+            // Set defaults to today's date and current month
+            const today = new Date();
+            const dateString = today.toISOString().split('T')[0];
+            const monthString = dateString.substring(0, 7);
+            
+            document.getElementById('trackingDate').value = dateString;
+            document.getElementById('dayFilter').value = dateString;
+            document.getElementById('monthFilter').value = monthString;
+            
+            updateTables(); 
         };
 
         function calculateTotal() {
@@ -292,8 +314,39 @@
             document.getElementById('totalQty').value = ok + rej;
         }
 
-        // Updated addRecord to saveRecord to handle both Add and Edit
-        function saveRecord() {
+        function clearFilter(type) {
+            if(type === 'day') document.getElementById('dayFilter').value = '';
+            if(type === 'month') document.getElementById('monthFilter').value = '';
+            updateTables();
+        }
+
+        function processImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 300; const MAX_HEIGHT = 300; 
+                        let width = img.width; let height = img.height;
+                        if (width > height) {
+                            if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                        } else {
+                            if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                        }
+                        canvas.width = width; canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.6)); 
+                    };
+                };
+                reader.onerror = reject;
+            });
+        }
+
+        async function handleSaveRecord() {
             const date = document.getElementById('trackingDate').value;
             const department = document.getElementById('department').value;
             const partName = document.getElementById('partName').value;
@@ -307,77 +360,91 @@
                 return;
             }
 
-            let rejPercent = "0.00%";
-            if (totalQty > 0) {
-                rejPercent = ((rejQty / totalQty) * 100).toFixed(2) + "%";
+            let rejPercent = totalQty > 0 ? ((rejQty / totalQty) * 100).toFixed(2) + "%" : "0.00%";
+            const files = document.getElementById('defectImages').files;
+            let imagesArray = [];
+
+            if (files.length > 0) {
+                document.getElementById('saveButton').textContent = "Saving... Please wait";
+                document.getElementById('saveButton').disabled = true;
+                for (let i = 0; i < files.length; i++) {
+                    try { imagesArray.push(await processImage(files[i])); } 
+                    catch(e) { console.error(e); }
+                }
             }
 
-            const recordData = { date, department, partName, defectType, totalQty, okQty, rejQty, rejPercent };
+            if (editIndex > -1 && files.length === 0) imagesArray = records[editIndex].images || [];
 
-            if (editIndex > -1) {
-                // Update existing record
-                records[editIndex] = recordData;
-                editIndex = -1; // Reset edit mode
-                
-                // Reset button style
-                const saveBtn = document.getElementById('saveButton');
-                saveBtn.textContent = "+ Save to Current List";
-                saveBtn.className = "btn-primary";
-            } else {
-                // Add new record
-                records.push(recordData);
+            const recordData = { date, department, partName, defectType, totalQty, okQty, rejQty, rejPercent, images: imagesArray };
+
+            try {
+                if (editIndex > -1) { records[editIndex] = recordData; editIndex = -1; } 
+                else { records.push(recordData); }
+
+                records.sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort latest first
+                localStorage.setItem('factoryRecords', JSON.stringify(records));
+            } catch (e) {
+                alert("Storage limit reached! Please clear old records.");
+                records = JSON.parse(localStorage.getItem('factoryRecords')) || []; 
+            } finally {
+                document.getElementById('saveButton').disabled = false;
+                document.getElementById('saveButton').textContent = "+ Save Record";
+                document.getElementById('saveButton').className = "btn-primary";
             }
 
-            localStorage.setItem('factoryRecords', JSON.stringify(records));
-            updateTable();
+            // Also auto-update the date filters to match the newly added record
+            document.getElementById('dayFilter').value = date;
+            document.getElementById('monthFilter').value = date.substring(0, 7);
 
-            // Clear form
+            updateTables();
+            
+            // Clear specific fields (leave date)
             document.getElementById('department').value = '';
             document.getElementById('partName').value = '';
             document.getElementById('defectType').value = '';
             document.getElementById('okQty').value = '';
             document.getElementById('rejQty').value = '';
             document.getElementById('totalQty').value = '';
-            document.getElementById('trackingDate').valueAsDate = new Date();
+            document.getElementById('defectImages').value = '';
             document.getElementById('department').focus();
         }
 
-        // NEW FUNCTION: Populate the form with the selected record's data for editing
         function editSpecificRecord(index) {
-            const record = records[index];
-            
-            document.getElementById('trackingDate').value = record.date;
-            document.getElementById('department').value = record.department;
-            document.getElementById('partName').value = record.partName;
-            document.getElementById('defectType').value = record.defectType;
-            document.getElementById('okQty').value = record.okQty;
-            document.getElementById('rejQty').value = record.rejQty;
-            calculateTotal(); // Recalculate total to update the readonly field
-
-            editIndex = index; // Set global variable to know which row is being updated
-
-            // Update button visual to show edit mode
+            const actualRecord = records[index];
+            document.getElementById('trackingDate').value = actualRecord.date;
+            document.getElementById('department').value = actualRecord.department;
+            document.getElementById('partName').value = actualRecord.partName;
+            document.getElementById('defectType').value = actualRecord.defectType;
+            document.getElementById('okQty').value = actualRecord.okQty;
+            document.getElementById('rejQty').value = actualRecord.rejQty;
+            calculateTotal(); 
+            editIndex = index; 
             const saveBtn = document.getElementById('saveButton');
             saveBtn.textContent = "✎ Update Record";
             saveBtn.className = "btn-warning";
-            
-            // Scroll smoothly to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function updateTable() {
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = ''; 
-
-            if (records.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" class="empty-message">No records added yet.</td></tr>';
-                return;
+        function getFilteredRecords(type) {
+            if (type === 'daily') {
+                const dayFilter = document.getElementById('dayFilter').value;
+                if (!dayFilter) return records;
+                return records.filter(row => row.date === dayFilter);
+            } else if (type === 'monthly') {
+                const monthFilter = document.getElementById('monthFilter').value;
+                if (!monthFilter) return records;
+                return records.filter(row => row.date.startsWith(monthFilter));
             }
+            return records;
+        }
 
-            records.forEach((row, index) => {
-                const tr = document.createElement('tr');
-                // Added an edit button to the table row
-                tr.innerHTML = `
+        function generateRowHTML(row, originalIndex) {
+            let imageHTML = "<em>No Image</em>";
+            if (row.images && row.images.length > 0) {
+                imageHTML = row.images.map(img => `<img src="${img}" class="thumbnail" onclick="window.open('${img}')" title="Click to view">`).join('');
+            }
+            return `
+                <tr>
                     <td>${row.date}</td>
                     <td>${row.department}</td>
                     <td>${row.partName}</td>
@@ -386,39 +453,49 @@
                     <td>${row.okQty}</td>
                     <td>${row.rejQty}</td>
                     <td style="font-weight: bold; color: ${parseFloat(row.rejPercent) > 5 ? 'red' : 'green'};">${row.rejPercent}</td>
+                    <td>${imageHTML}</td>
                     <td class="action-col">
                         <div class="row-action-group">
-                            <button type="button" class="btn-edit-row" title="Edit Row" onclick="editSpecificRecord(${index})">✎</button>
-                            <button type="button" class="btn-delete-row" title="Delete Row" onclick="deleteSpecificRecord(${index})">✖</button>
+                            <button type="button" class="btn-edit-row" title="Edit" onclick="editSpecificRecord(${originalIndex})">✎</button>
+                            <button type="button" class="btn-delete-row" title="Delete" onclick="deleteSpecificRecord(${originalIndex})">✖</button>
                         </div>
                     </td>
-                `;
-                tbody.appendChild(tr);
-            });
+                </tr>
+            `;
+        }
+
+        function updateTables() {
+            // Update Daily
+            const dailyRecords = getFilteredRecords('daily');
+            const dailyBody = document.getElementById('dailyTableBody');
+            const dailyVal = document.getElementById('dayFilter').value;
+            document.getElementById('dailyTableTitle').textContent = dailyVal ? `Daily Records for: ${dailyVal}` : 'All Records (No Day Filter)';
+            
+            if(dailyRecords.length === 0) dailyBody.innerHTML = '<tr><td colspan="10" class="empty-message">No records found for this date.</td></tr>';
+            else dailyBody.innerHTML = dailyRecords.map(row => generateRowHTML(row, records.indexOf(row))).join('');
+
+            // Update Monthly
+            const monthlyRecords = getFilteredRecords('monthly');
+            const monthlyBody = document.getElementById('monthlyTableBody');
+            const monthlyVal = document.getElementById('monthFilter').value;
+            document.getElementById('monthlyTableTitle').textContent = monthlyVal ? `Monthly Records for: ${monthlyVal}` : 'All Records (No Month Filter)';
+            
+            if(monthlyRecords.length === 0) monthlyBody.innerHTML = '<tr><td colspan="10" class="empty-message">No records found for this month.</td></tr>';
+            else monthlyBody.innerHTML = monthlyRecords.map(row => generateRowHTML(row, records.indexOf(row))).join('');
         }
 
         function deleteSpecificRecord(index) {
             if (confirm("Are you sure you want to delete this specific record?")) {
                 records.splice(index, 1);
-                
-                // If user deleted the record they were currently editing, reset the form
                 if (editIndex === index) {
                     editIndex = -1;
-                    document.getElementById('saveButton').textContent = "+ Save to Current List";
+                    document.getElementById('saveButton').textContent = "+ Save Record";
                     document.getElementById('saveButton').className = "btn-primary";
-                    document.getElementById('department').value = '';
-                    document.getElementById('partName').value = '';
-                    document.getElementById('defectType').value = '';
-                    document.getElementById('okQty').value = '';
-                    document.getElementById('rejQty').value = '';
-                    document.getElementById('totalQty').value = '';
                 } else if (editIndex > index) {
-                    // Shift the edit index if a row above it was deleted
                     editIndex--;
                 }
-
                 localStorage.setItem('factoryRecords', JSON.stringify(records));
-                updateTable();
+                updateTables();
             }
         }
 
@@ -427,69 +504,95 @@
                 records = [];
                 localStorage.removeItem('factoryRecords');
                 editIndex = -1;
-                document.getElementById('saveButton').textContent = "+ Save to Current List";
-                document.getElementById('saveButton').className = "btn-primary";
-                updateTable();
+                updateTables();
             }
         }
 
-        function downloadDataFiles() {
-            if (records.length === 0) {
-                alert("No records to download. Please add data first.");
-                return;
-            }
-
-            let csvContent = "Date,Department,Part Name,Defect Type,Total Qty,OK Qty,Rejected Qty,Rejection %\n";
+        /* --- EXPORT FUNCTIONS (Dynamically handles Daily vs Monthly) --- */
+        
+        function downloadExcelFile(type) {
+            const displayedRecords = getFilteredRecords(type);
+            if (displayedRecords.length === 0) return alert("No records to download.");
             
-            records.forEach(row => {
-                csvContent += `${row.date},"${row.department}","${row.partName}","${row.defectType}",${row.totalQty},${row.okQty},${row.rejQty},${row.rejPercent}\n`;
+            const filterInput = type === 'daily' ? document.getElementById('dayFilter').value : document.getElementById('monthFilter').value;
+            const filterText = filterInput ? `(${filterInput})` : '';
+
+            let htmlContent = `
+                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
+                <head>
+                    <meta charset="utf-8">
+                    <style>
+                        table { border-collapse: collapse; width: 100%; }
+                        th, td { border: 1px solid black; padding: 5px; text-align: left; vertical-align: middle; }
+                        .excel-img { margin-right: 5px; display: inline-block; vertical-align: middle; }
+                    </style>
+                </head>
+                <body>
+                    <table>
+                        <tr>
+                            <th colspan="9" style="color: darkred; font-size: 20px; font-weight: bold; text-align: center; background-color: #f4f4f4; padding: 10px;">
+                                ${type.toUpperCase()} Rejection Data ${filterText}
+                            </th>
+                        </tr>
+                        <tr>
+                            <th>Date</th><th>Department</th><th>Part Name</th><th>Defect Type</th>
+                            <th>Total Qty</th><th>OK Qty</th><th>Rejected Qty</th><th>Rejection %</th><th>Defect Images</th>
+                        </tr>
+            `;
+            
+            displayedRecords.forEach(row => {
+                let imgContent = '';
+                if (row.images && row.images.length > 0) {
+                    imgContent = row.images.map(img => `<img class="excel-img" src="${img}" height="50">`).join(' ');
+                }
+                htmlContent += `
+                    <tr style="height: 60px;">
+                        <td>${row.date}</td><td>${row.department}</td><td>${row.partName}</td><td>${row.defectType}</td>
+                        <td>${row.totalQty}</td><td>${row.okQty}</td><td>${row.rejQty}</td><td>${row.rejPercent}</td>
+                        <td style="white-space: nowrap;">${imgContent}</td>
+                    </tr>
+                `;
             });
 
-            const fileName = `Factory_Rejection_Data_${new Date().toISOString().split('T')[0]}.csv`;
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-
-            if (navigator.canShare && navigator.canShare({ files: [new File([blob], fileName, { type: 'text/csv' })] })) {
-                const file = new File([blob], fileName, { type: 'text/csv' });
-                navigator.share({
-                    title: 'Factory Rejection Data',
-                    files: [file]
-                }).catch(err => console.log("Share cancelled or failed:", err));
-            } else {
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement("a");
-                link.setAttribute("href", url);
-                link.setAttribute("download", fileName);
-                
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-            }
+            htmlContent += `</table></body></html>`;
+            const fileName = `Factory_${type}_Data_${new Date().toISOString().split('T')[0]}.xls`;
+            const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url); link.setAttribute("download", fileName);
+            document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
         }
 
-        function shareViaMail() {
-            if (records.length === 0) {
-                alert("No records to share. Please add data first.");
-                return;
-            }
+        function downloadCSVFile(type) {
+            const displayedRecords = getFilteredRecords(type);
+            if (displayedRecords.length === 0) return alert("No records to download.");
 
-            let summaryText = "Date | Dept | Part | Defect | Total | OK | Rej | Rej %\n";
-            summaryText += "------------------------------------------------------------------\n";
-            
-            records.forEach(row => {
+            let csvContent = "Date,Department,Part Name,Defect Type,Total Qty,OK Qty,Rejected Qty,Rejection %,Has Image?\n";
+            displayedRecords.forEach(row => {
+                const hasImage = (row.images && row.images.length > 0) ? "Yes" : "No";
+                csvContent += `${row.date},"${row.department}","${row.partName}","${row.defectType}",${row.totalQty},${row.okQty},${row.rejQty},"${row.rejPercent}","${hasImage}"\n`;
+            });
+
+            const fileName = `Factory_${type}_Data_TextOnly_${new Date().toISOString().split('T')[0]}.csv`;
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url); link.setAttribute("download", fileName);
+            document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
+        }
+
+        function shareViaMail(type) {
+            const displayedRecords = getFilteredRecords(type);
+            if (displayedRecords.length === 0) return alert("No records to share.");
+
+            let summaryText = "Date | Dept | Part | Defect | Total | OK | Rej | Rej %\n------------------------------------------------------------------\n";
+            displayedRecords.forEach(row => {
                 summaryText += `${row.date} | ${row.department} | ${row.partName} | ${row.defectType} | ${row.totalQty} | ${row.okQty} | ${row.rejQty} | ${row.rejPercent}\n`;
             });
 
-            const emailSubject = encodeURIComponent(`Factory Rejection Data Report`);
-            const emailBody = encodeURIComponent(
-                `Hello,\n\n` +
-                `Please find the latest rejection data summary below:\n\n` +
-                `${summaryText}\n\n` +
-                `[Note: Please find any required CSV data files or Defect Images attached.]\n\n` +
-                `Regards,\n[Your Name]`
-            );
-
-            window.location.href = `mailto:manager@factory.com?subject=${emailSubject}&body=${emailBody}`;
+            const emailSubject = encodeURIComponent(`Factory ${type.charAt(0).toUpperCase() + type.slice(1)} Rejection Data`);
+            const emailBody = encodeURIComponent(`Hello,\n\nPlease find the latest rejection data below:\n\n${summaryText}\n\n[Note: Please find the downloaded Data file attached.]\n\nRegards,\n[Your Name]`);
+            window.location.href = `mailto:?subject=${emailSubject}&body=${emailBody}`;
         }
     </script>
 </body>
