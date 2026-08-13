@@ -103,6 +103,9 @@
         .btn-success { background-color: #28a745; flex: 1; }
         .btn-success:hover { background-color: #218838; }
 
+        .btn-print { background-color: #343a40; flex: 1; }
+        .btn-print:hover { background-color: #23272b; }
+
         .btn-danger { background-color: #dc3545; padding: 8px 12px; font-size: 12px; }
         .btn-danger:hover { background-color: #c82333; }
         
@@ -168,6 +171,26 @@
             align-items: center;
             gap: 15px;
             margin-bottom: 15px;
+        }
+
+        /* --- PRINT STYLES --- */
+        @media print {
+            body { background-color: white; padding: 0; }
+            
+            /* Hide the container not being printed based on the body class */
+            body.print-daily .container:not(.daily-box) { display: none !important; }
+            body.print-monthly .container:not(.monthly-box) { display: none !important; }
+            
+            /* Clean up the container being printed */
+            .container { box-shadow: none; border: none; padding: 0; max-width: 100%; margin: 0; }
+            
+            /* Hide buttons and interactive elements for a clean paper print */
+            .action-buttons, .filter-header button, .btn-danger, .action-col, th.action-col, td.action-col { 
+                display: none !important; 
+            }
+            
+            /* Print the input values as text so the user knows the filter context */
+            input[type="date"], input[type="month"] { border: none; font-weight: bold; }
         }
     </style>
 </head>
@@ -245,8 +268,9 @@
         </table>
 
         <div class="action-buttons">
-            <button type="button" class="btn-download-xls" onclick="downloadExcelFile('daily')">📊 Download Daily Excel (Images)</button>
-            <button type="button" class="btn-download-csv" onclick="downloadCSVFile('daily')">📄 Download Daily CSV (Text)</button>
+            <button type="button" class="btn-print" onclick="printSection('daily')">🖨 Print Daily</button>
+            <button type="button" class="btn-download-xls" onclick="downloadExcelFile('daily')">📊 Download Excel (Images)</button>
+            <button type="button" class="btn-download-csv" onclick="downloadCSVFile('daily')">📄 Download CSV (Text)</button>
             <button type="button" class="btn-success" onclick="shareViaMail('daily')">✉ Share Daily Mail</button>
         </div>
     </div>
@@ -284,8 +308,9 @@
         </table>
 
         <div class="action-buttons">
-            <button type="button" class="btn-download-xls" onclick="downloadExcelFile('monthly')">📊 Download Monthly Excel (Images)</button>
-            <button type="button" class="btn-download-csv" onclick="downloadCSVFile('monthly')">📄 Download Monthly CSV (Text)</button>
+            <button type="button" class="btn-print" onclick="printSection('monthly')">🖨 Print Monthly</button>
+            <button type="button" class="btn-download-xls" onclick="downloadExcelFile('monthly')">📊 Download Excel (Images)</button>
+            <button type="button" class="btn-download-csv" onclick="downloadCSVFile('monthly')">📄 Download CSV (Text)</button>
             <button type="button" class="btn-success" onclick="shareViaMail('monthly')">✉ Share Monthly Mail</button>
         </div>
     </div>
@@ -307,6 +332,15 @@
             
             updateTables(); 
         };
+
+        // --- Print Functionality ---
+        function printSection(type) {
+            // Apply a specific class to the body so CSS knows which part to print
+            document.body.className = 'print-' + type;
+            window.print();
+            // Remove the class immediately after the print dialog closes
+            document.body.className = '';
+        }
 
         function calculateTotal() {
             const ok = parseInt(document.getElementById('okQty').value) || 0;
@@ -508,8 +542,7 @@
             }
         }
 
-        /* --- EXPORT FUNCTIONS (Dynamically handles Daily vs Monthly) --- */
-        
+        /* --- EXPORT FUNCTIONS --- */
         function downloadExcelFile(type) {
             const displayedRecords = getFilteredRecords(type);
             if (displayedRecords.length === 0) return alert("No records to download.");
