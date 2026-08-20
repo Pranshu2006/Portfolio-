@@ -4,55 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QuickBite - Owner Portal</title>
+    <!-- ADDING FIREBASE LIBRARIES -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <style>
-        /* Shared Styles */
+        /* Shared Styles (Unchanged) */
         :root { --primary: #ff4757; --secondary: #1e90ff; --success: #2ed573; --warning: #ffa502; --dark: #2f3542; --light: #f1f2f6; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--light); color: var(--dark); }
         header { background-color: var(--dark); color: white; padding: 1rem; text-align: center; }
         .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
         .hidden { display: none !important; }
-        
-        /* Login Screen */
         #login-screen { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
         #login-screen input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;}
-        
-        /* Owner UI */
         .admin-section { background: white; padding: 20px; border-radius: 8px; margin-top: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .dashboard-section { display: flex; justify-content: space-around; background: var(--dark); color: white; padding: 20px; border-radius: 8px; margin-top: 20px;}
         .dashboard-card { text-align: center; padding: 10px; width: 30%; }
         .dashboard-card .amount { font-size: 2rem; font-weight: bold; color: var(--success); }
-        
-        /* Buttons */
         button.action-btn { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 10px; }
         button.process-btn { background: var(--secondary); }
         button.complete-btn { background: var(--success); }
         button.edit-btn { background: var(--warning); color: #fff;}
         button.delete-btn { background: var(--dark); }
-        
-        /* Orders */
         .order-card { border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 4px; background-color: #fff; }
         .status-badge { padding: 5px 10px; border-radius: 20px; color: white; font-size: 0.9rem; font-weight: bold; }
         .status-pending { background-color: var(--warning); }
         .status-processing { background-color: var(--secondary); }
         .status-completed { background-color: var(--success); }
-        
-        /* Menu Grid */
         .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
         .menu-card { background: white; border-radius: 8px; padding: 15px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
         .menu-card img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; }
         .menu-card h3 { margin: 10px 0 5px 0; }
         .menu-card .desc { font-size: 0.9rem; color: #57606f; margin-bottom: 10px; height: 40px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
         .menu-card .price { font-weight: bold; font-size: 1.2rem; color: var(--success); }
-        
-        /* Forms & Modals */
         .form-group { margin-bottom: 15px; }
         .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-family: inherit;}
-        
-        /* Edit Modal Overlay */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 2000; }
         .modal-content { background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        
-        /* Notifications */
         #toast { visibility: hidden; min-width: 250px; background-color: var(--success); color: #fff; text-align: center; border-radius: 4px; padding: 16px; position: fixed; right: 20px; bottom: 20px; font-size: 17px; z-index: 1000; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 4.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 20px; opacity: 1;} }
@@ -62,23 +50,17 @@
 <body>
     <header><h2>Admin Portal</h2></header>
 
-    <!-- Login Security Panel -->
     <div id="login-screen">
         <h2>Owner Login</h2>
-        <p>Enter password to access dashboard.</p>
         <input type="password" id="owner-password" placeholder="Password is: admin123">
         <button class="action-btn" onclick="checkLogin()">Login</button>
         <p id="login-error" style="color: red; display: none;">Incorrect password.</p>
     </div>
 
-    <!-- Main Owner Dashboard (Hidden until login) -->
     <div id="owner-dashboard" class="container hidden">
-        
-        <!-- Enhanced Sales Analytics -->
+        <!-- Sales Analytics -->
         <div class="admin-section">
             <h2>Sales Analytics</h2>
-            
-            <!-- Live Stats -->
             <div class="dashboard-section" style="margin-top: 0;">
                 <div class="dashboard-card">
                     <h3>Today</h3>
@@ -96,39 +78,11 @@
                     <div style="font-size: 0.9rem; margin-top: 5px; color: #a4b0be;">Orders: <span id="orders-total">0</span></div>
                 </div>
             </div>
-
-            <!-- Historical Search -->
-            <h3 style="margin-top: 25px; color: var(--dark);">Search Previous Months</h3>
-            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px;">
-                <select id="search-month" style="flex: 1;">
-                    <option value="0">January</option>
-                    <option value="1">February</option>
-                    <option value="2">March</option>
-                    <option value="3">April</option>
-                    <option value="4">May</option>
-                    <option value="5">June</option>
-                    <option value="6">July</option>
-                    <option value="7">August</option>
-                    <option value="8">September</option>
-                    <option value="9">October</option>
-                    <option value="10">November</option>
-                    <option value="11">December</option>
-                </select>
-                <input type="number" id="search-year" placeholder="Year (e.g. 2024)" style="width: 120px;">
-                <button class="action-btn" style="width: auto; margin-top: 0;" onclick="searchHistoricalSales()">Search</button>
-            </div>
-            
-            <!-- Search Results Display -->
-            <div id="historical-results" class="hidden" style="background: var(--light); padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #ccc;">
-                <h4 style="margin: 0 0 10px 0; color: var(--primary);" id="hist-title">Results</h4>
-                <p style="margin: 5px 0;">Total Revenue: <strong style="color: var(--success); font-size: 1.2rem;">₹<span id="hist-revenue">0.00</span></strong></p>
-                <p style="margin: 5px 0;">Total Orders Completed: <strong id="hist-orders">0</strong></p>
-            </div>
         </div>
 
         <!-- Live Orders -->
         <div class="admin-section">
-            <h2>Live Orders</h2>
+            <h2>Live Orders (Updates Instantly)</h2>
             <div id="orders-list"></div>
         </div>
 
@@ -136,8 +90,7 @@
         <div class="admin-section">
             <h2>Add New Menu Item</h2>
             <div class="form-group"><input type="text" id="new-item-name" placeholder="Item Name"></div>
-            <!-- Added Description Field -->
-            <div class="form-group"><textarea id="new-item-desc" placeholder="Food Description (e.g., Ingredients, flavors)" rows="2"></textarea></div>
+            <div class="form-group"><textarea id="new-item-desc" placeholder="Food Description" rows="2"></textarea></div>
             <div class="form-group"><input type="number" id="new-item-price" placeholder="Price (₹)" step="1"></div>
             <div class="form-group">
                 <label style="display: block; font-size: 0.9rem; margin-bottom: 5px;">Upload Food Image:</label>
@@ -160,7 +113,7 @@
                 <button class="action-btn delete-btn" style="width: auto; margin-top: 10px;" onclick="deleteQR()">Delete QR Code</button>
             </div>
             <div class="form-group">
-                <label style="display: block; font-weight: bold; margin-bottom: 5px;">Upload New QR Code (Image)</label>
+                <label>Upload New QR Code (Image)</label>
                 <input type="file" id="qr-upload-file" accept="image/*">
             </div>
             <button class="action-btn" onclick="saveQR()">Save QR Code</button>
@@ -172,22 +125,10 @@
         <div class="modal-content">
             <h2 style="margin-top: 0;">Edit Menu Item</h2>
             <input type="hidden" id="edit-item-id">
-            <div class="form-group">
-                <label>Name:</label>
-                <input type="text" id="edit-item-name">
-            </div>
-            <div class="form-group">
-                <label>Description:</label>
-                <textarea id="edit-item-desc" rows="3"></textarea>
-            </div>
-            <div class="form-group">
-                <label>Price (₹):</label>
-                <input type="number" id="edit-item-price" step="1">
-            </div>
-            <div class="form-group">
-                <label>Update Image (Optional):</label>
-                <input type="file" id="edit-item-img-file" accept="image/*">
-            </div>
+            <div class="form-group"><label>Name:</label><input type="text" id="edit-item-name"></div>
+            <div class="form-group"><label>Description:</label><textarea id="edit-item-desc" rows="3"></textarea></div>
+            <div class="form-group"><label>Price (₹):</label><input type="number" id="edit-item-price" step="1"></div>
+            <div class="form-group"><label>Update Image (Optional):</label><input type="file" id="edit-item-img-file" accept="image/*"></div>
             <div style="display: flex; gap: 10px;">
                 <button class="action-btn complete-btn" onclick="saveEditedItem()">Save Changes</button>
                 <button class="action-btn delete-btn" onclick="closeEditModal()">Cancel</button>
@@ -198,51 +139,83 @@
     <div id="toast">🔔 New Order Received!</div>
 
     <script>
-        // --- Authentication ---
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyBhR4jU9Ipfe9ZC1QDUbsEHIyMNPnnrrv0",
+  authDomain: "restraint-management.firebaseapp.com",
+  databaseURL: "https://restraint-management-default-rtdb.firebaseio.com",
+  projectId: "restraint-management",
+  storageBucket: "restraint-management.firebasestorage.app",
+  messagingSenderId: "227363602748",
+  appId: "1:227363602748:web:6c994ea883f66f74475e39",
+  measurementId: "G-897G5QSPKB"
+};
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Data holders
+        let menuItems = []; 
+        let orders = []; 
+        let currentOrderCount = 0;
+
         function checkLogin() {
             const pass = document.getElementById('owner-password').value;
             if (pass === 'admin123') { 
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('owner-dashboard').classList.remove('hidden');
-                initOwnerData();
+                initFirebaseListeners();
             } else {
                 document.getElementById('login-error').style.display = 'block';
             }
         }
 
-        let menuItems = []; let orders = []; let salesHistory = [];
+        // --- FIREBASE LIVE LISTENERS ---
+        function initFirebaseListeners() {
+            // Listen to Menu changes
+            database.ref('menu').on('value', (snapshot) => {
+                const data = snapshot.val();
+                menuItems = data ? Object.values(data) : [];
+                renderMenu();
+            });
 
-        function initOwnerData() {
-            // Load existing data or set default menu items if none exist
-            menuItems = JSON.parse(localStorage.getItem('restaurantMenu')) || [
-                { id: 1, name: "Classic Burger", desc: "Juicy beef patty with fresh lettuce, tomato, and cheese.", price: 149.00, img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&q=80" },
-                { id: 2, name: "Margherita Pizza", desc: "Classic delight with 100% real mozzarella cheese.", price: 299.00, img: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=500&q=80" }
-            ];
-            orders = JSON.parse(localStorage.getItem('restaurantOrders')) || [];
-            salesHistory = JSON.parse(localStorage.getItem('restaurantSales')) || [];
-            
-            // Auto-fill current month and year in search tool
-            document.getElementById('search-year').value = new Date().getFullYear();
-            document.getElementById('search-month').value = new Date().getMonth();
+            // Listen to Orders changes
+            database.ref('orders').on('value', (snapshot) => {
+                const data = snapshot.val();
+                orders = data ? Object.values(data) : [];
+                
+                // Alert if new order came in
+                if (orders.length > currentOrderCount && currentOrderCount > 0) {
+                    showToast();
+                }
+                currentOrderCount = orders.length;
 
-            renderMenu(); 
-            renderOrders(); 
-            renderSales();
-            renderOwnerQR();
+                renderOrders();
+                renderSales();
+            });
+
+            // Listen to QR Code
+            database.ref('settings/qrCode').on('value', (snapshot) => {
+                const qrUrl = snapshot.val();
+                const previewBox = document.getElementById('owner-qr-display');
+                const previewImg = document.getElementById('owner-qr-preview');
+                if (qrUrl) {
+                    previewImg.src = qrUrl; 
+                    previewBox.classList.remove('hidden'); 
+                } else {
+                    previewBox.classList.add('hidden'); 
+                }
+            });
         }
 
-        function saveData() {
-            localStorage.setItem('restaurantMenu', JSON.stringify(menuItems));
-            localStorage.setItem('restaurantOrders', JSON.stringify(orders));
-            localStorage.setItem('restaurantSales', JSON.stringify(salesHistory));
-        }
-
-        // --- Order Processing ---
+        // --- ORDER MANAGEMENT ---
         function renderOrders() {
-            const div = document.getElementById('orders-list'); div.innerHTML = '';
+            const div = document.getElementById('orders-list'); 
+            div.innerHTML = '';
             if (orders.length === 0) return div.innerHTML = '<p>No orders yet.</p>';
             
-            [...orders].reverse().forEach(o => {
+            // Sort to show newest first
+            [...orders].sort((a, b) => b.id - a.id).forEach(o => {
                 let btn = o.status === 'pending' ? `<button class="action-btn process-btn" onclick="updateStatus(${o.id}, 'processing')">Confirm Order</button>` 
                         : o.status === 'processing' ? `<button class="action-btn complete-btn" onclick="updateStatus(${o.id}, 'completed')">Mark Ready</button>` 
                         : `<span style="color:var(--success); font-weight:bold;">✓ Completed</span>`;
@@ -253,6 +226,7 @@
                     <div class="order-card">
                         <strong>Order #${o.id.toString().slice(-4)}</strong> <span class="status-badge status-${o.status}" style="float:right;">${o.status.toUpperCase()}</span>
                         <br><strong>Customer:</strong> ${o.customer} | <strong>Pay:</strong> ${o.payment} ${utrDisplay}
+                        <br><strong>Time:</strong> ${o.time}
                         <br><strong>Items:</strong> ${o.items.map(i=>i.name).join(', ')} - <strong>Total:</strong> ₹${o.total.toFixed(2)}
                         <br>${btn}
                     </div>`;
@@ -260,33 +234,32 @@
         }
 
         function updateStatus(id, status) {
-            const order = orders.find(o => o.id === id);
-            if (order) {
-                order.status = status;
-                if (status === 'completed') salesHistory.push({ id: order.id, total: order.total, timestamp: Date.now() });
-                saveData(); renderOrders(); renderSales();
-            }
+            // Update the specific order in Firebase
+            database.ref('orders/' + id).update({ status: status });
         }
 
-        // --- Sales Analytics ---
+        // --- SALES ANALYTICS ---
         function renderSales() {
             let todayTotal = 0, monthTotal = 0, allTimeTotal = 0;
-            let todayCount = 0, monthCount = 0, allTimeCount = salesHistory.length;
+            let todayCount = 0, monthCount = 0, allTimeCount = 0;
             
             const now = new Date();
             const todayStr = now.toLocaleDateString();
             const currentMonth = now.getMonth();
             const currentYear = now.getFullYear();
 
-            salesHistory.forEach(s => {
-                allTimeTotal += s.total; 
-                const saleDate = new Date(s.timestamp);
-                
-                if (saleDate.toLocaleDateString() === todayStr) { 
-                    todayTotal += s.total; todayCount++;
-                }
-                if (saleDate.getMonth() === currentMonth && saleDate.getFullYear() === currentYear) { 
-                    monthTotal += s.total; monthCount++;
+            orders.forEach(order => {
+                if(order.status === 'completed') {
+                    allTimeTotal += order.total;
+                    allTimeCount++;
+                    
+                    const saleDate = new Date(order.id); // Using timestamp ID as date
+                    if (saleDate.toLocaleDateString() === todayStr) { 
+                        todayTotal += order.total; todayCount++;
+                    }
+                    if (saleDate.getMonth() === currentMonth && saleDate.getFullYear() === currentYear) { 
+                        monthTotal += order.total; monthCount++;
+                    }
                 }
             });
 
@@ -298,61 +271,7 @@
             document.getElementById('orders-total').innerText = allTimeCount;
         }
 
-        function searchHistoricalSales() {
-            const m = parseInt(document.getElementById('search-month').value);
-            const y = parseInt(document.getElementById('search-year').value);
-            
-            if (isNaN(y)) return alert("Please enter a valid year.");
-            
-            let histTotal = 0; let histCount = 0;
-            
-            salesHistory.forEach(s => {
-                const d = new Date(s.timestamp);
-                if (d.getMonth() === m && d.getFullYear() === y) {
-                    histTotal += s.total; histCount++;
-                }
-            });
-            
-            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            document.getElementById('hist-title').innerText = `Sales Data for ${monthNames[m]} ${y}`;
-            document.getElementById('hist-revenue').innerText = histTotal.toFixed(2);
-            document.getElementById('hist-orders').innerText = histCount;
-            
-            document.getElementById('historical-results').classList.remove('hidden');
-        }
-
-        // --- QR Code Management ---
-        function renderOwnerQR() {
-            const previewBox = document.getElementById('owner-qr-display');
-            const previewImg = document.getElementById('owner-qr-preview');
-            const ownerQR = localStorage.getItem('restaurantQR');
-            
-            if (ownerQR) { 
-                previewImg.src = ownerQR; previewBox.classList.remove('hidden'); 
-            } else { 
-                previewBox.classList.add('hidden'); 
-            }
-        }
-
-        function saveQR() {
-            const fileInput = document.getElementById('qr-upload-file');
-            if (fileInput.files && fileInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    localStorage.setItem('restaurantQR', e.target.result);
-                    renderOwnerQR(); alert("QR Code Saved Successfully!");
-                };
-                reader.readAsDataURL(fileInput.files[0]);
-            } else { alert("Please select an image file first."); }
-        }
-
-        function deleteQR() {
-            if(confirm("Are you sure you want to delete your payment QR code?")) {
-                localStorage.removeItem('restaurantQR'); renderOwnerQR(); alert("QR Code removed.");
-            }
-        }
-
-        // --- Menu Management ---
+        // --- MENU MANAGEMENT ---
         function renderMenu() {
             const grid = document.getElementById('owner-menu-grid'); grid.innerHTML = '';
             menuItems.forEach(item => {
@@ -371,7 +290,6 @@
             });
         }
 
-        // Add Item logic
         function addItem() {
             const name = document.getElementById('new-item-name').value;
             const desc = document.getElementById('new-item-desc').value;
@@ -380,18 +298,18 @@
             
             if (!name || isNaN(price)) return alert("Valid name and price required.");
 
+            const id = Date.now();
             if (file) {
                 const r = new FileReader(); 
-                r.onload = e => saveItem(name, desc, price, e.target.result); 
+                r.onload = e => pushItemToFirebase(id, name, desc, price, e.target.result); 
                 r.readAsDataURL(file);
             } else { 
-                saveItem(name, desc, price, "https://via.placeholder.com/300?text=No+Image"); 
+                pushItemToFirebase(id, name, desc, price, "https://via.placeholder.com/300?text=No+Image"); 
             }
         }
 
-        function saveItem(name, desc, price, img) {
-            menuItems.push({ id: Date.now(), name, desc, price, img });
-            saveData(); renderMenu();
+        function pushItemToFirebase(id, name, desc, price, img) {
+            database.ref('menu/' + id).set({ id, name, desc, price, img });
             // Clear inputs
             document.getElementById('new-item-name').value = ''; 
             document.getElementById('new-item-desc').value = ''; 
@@ -401,13 +319,10 @@
 
         function deleteItem(id) {
             if(confirm("Delete item from menu?")) { 
-                menuItems = menuItems.filter(i => i.id !== id); 
-                saveData(); 
-                renderMenu(); 
+                database.ref('menu/' + id).remove();
             }
         }
 
-        // Edit Item Logic
         function openEditModal(id) {
             const item = menuItems.find(i => i.id === id);
             if (!item) return;
@@ -416,14 +331,11 @@
             document.getElementById('edit-item-name').value = item.name;
             document.getElementById('edit-item-desc').value = item.desc || '';
             document.getElementById('edit-item-price').value = item.price;
-            document.getElementById('edit-item-img-file').value = ''; // Reset file input
-            
+            document.getElementById('edit-item-img-file').value = ''; 
             document.getElementById('edit-modal').classList.remove('hidden');
         }
 
-        function closeEditModal() {
-            document.getElementById('edit-modal').classList.add('hidden');
-        }
+        function closeEditModal() { document.getElementById('edit-modal').classList.add('hidden'); }
 
         function saveEditedItem() {
             const id = parseInt(document.getElementById('edit-item-id').value);
@@ -434,44 +346,42 @@
             
             if (!name || isNaN(price)) return alert("Valid name and price required.");
 
-            const index = menuItems.findIndex(i => i.id === id);
-            if (index !== -1) {
-                menuItems[index].name = name;
-                menuItems[index].desc = desc;
-                menuItems[index].price = price;
-                
-                if (file) {
-                    const r = new FileReader();
-                    r.onload = function(e) {
-                        menuItems[index].img = e.target.result;
-                        finalizeEdit();
-                    };
-                    r.readAsDataURL(file);
-                } else {
-                    finalizeEdit();
-                }
+            if (file) {
+                const r = new FileReader();
+                r.onload = function(e) {
+                    database.ref('menu/' + id).update({ name, desc, price, img: e.target.result });
+                    closeEditModal();
+                };
+                r.readAsDataURL(file);
+            } else {
+                database.ref('menu/' + id).update({ name, desc, price });
+                closeEditModal();
             }
         }
 
-        function finalizeEdit() {
-            saveData();
-            renderMenu();
-            closeEditModal();
+        // --- QR MANAGEMENT ---
+        function saveQR() {
+            const fileInput = document.getElementById('qr-upload-file');
+            if (fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    database.ref('settings/qrCode').set(e.target.result);
+                    alert("QR Code Saved to Cloud!");
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else { alert("Please select an image file first."); }
+        }
+
+        function deleteQR() {
+            if(confirm("Delete payment QR code?")) {
+                database.ref('settings/qrCode').remove();
+            }
         }
 
         function showToast() {
             const toast = document.getElementById("toast"); toast.className = "show";
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 4000);
         }
-
-        // --- LIVE SYNC --- 
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'restaurantOrders' && !document.getElementById('owner-dashboard').classList.contains('hidden')) {
-                const newOrders = JSON.parse(e.newValue || '[]');
-                if (newOrders.length > orders.length) showToast(); 
-                orders = newOrders; renderOrders();
-            }
-        });
     </script>
 </body>
 </html>
