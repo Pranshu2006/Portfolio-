@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QuickBite - Order Here</title>
+    
+    <!-- FIREBASE LIBRARIES -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <style>
         /* Shared Styles */
         :root { --primary: #ff4757; --success: #2ed573; --warning: #ffa502; --dark: #2f3542; --light: #f1f2f6; }
@@ -39,17 +44,17 @@
     </style>
 </head>
 <body>
-    <header>
-        <h2>🍔 QuickBite Menu</h2>
-    </header>
+    <header><h2>🍔 QuickBite Menu</h2></header>
 
     <div class="container">
         <h2>Our Menu</h2>
-        <div class="menu-grid" id="customer-menu-grid"></div>
+        <div class="menu-grid" id="customer-menu-grid">
+            <p>Loading Live Menu from Cloud...</p>
+        </div>
 
         <div class="cart-section">
             <h2>Your Order Cart</h2>
-            <ul id="cart-items"></ul>
+            <ul id="cart-items"><li style="color: #7f8c8d;">Your cart is empty.</li></ul>
             <h3>Total: ₹<span id="cart-total">0.00</span></h3>
             
             <div class="form-group">
@@ -83,18 +88,55 @@
     <div id="toast">Message goes here...</div>
 
     <script>
-        let menuItems = JSON.parse(localStorage.getItem('restaurantMenu')) || [
-            { id: 1, name: "Classic Burger", desc: "Juicy burger with fresh toppings.", price: 149.00, img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&q=80" },
-            { id: 2, name: "Margherita Pizza", desc: "Loaded with fresh mozzarella cheese.", price: 299.00, img: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=500&q=80" }
-        ];
-        let orders = JSON.parse(localStorage.getItem('restaurantOrders')) || [];
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyBhR4jU9Ipfe9ZC1QDUbsEHIyMNPnnrrv0",
+  authDomain: "restraint-management.firebaseapp.com",
+  databaseURL: "https://restraint-management-default-rtdb.firebaseio.com",
+  projectId: "restraint-management",
+  storageBucket: "restraint-management.firebasestorage.app",
+  messagingSenderId: "227363602748",
+  appId: "1:227363602748:web:6c994ea883f66f74475e39",
+  measurementId: "G-897G5QSPKB"
+};
+        // =====================================================================
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        let menuItems = [];
+        let allOrders = []; 
         let cart = [];
+        let ownerQR = null;
+        
         let myOrderIds = JSON.parse(sessionStorage.getItem('myOrders')) || [];
         let notifiedOrders = JSON.parse(sessionStorage.getItem('notifiedOrders')) || [];
 
+        // --- FETCH CLOUD DATA ---
+        database.ref('menu').on('value', (snapshot) => {
+            const data = snapshot.val();
+            menuItems = data ? Object.values(data) : [];
+            renderMenu();
+        });
+
+        database.ref('orders').on('value', (snapshot) => {
+            const data = snapshot.val();
+            allOrders = data ? Object.values(data) : [];
+            checkCustomerOrderUpdates();
+        });
+
+        database.ref('settings/qrCode').on('value', (snapshot) => {
+            ownerQR = snapshot.val();
+            toggleCustomerQR(); 
+        });
+
+        // --- UI FUNCTIONS ---
         function renderMenu() {
             const grid = document.getElementById('customer-menu-grid');
             grid.innerHTML = '';
+            if (menuItems.length === 0) return grid.innerHTML = '<p>The menu is currently empty.</p>';
+            
             menuItems.forEach(item => {
                 const desc = item.desc ? item.desc : '';
                 grid.innerHTML += `
@@ -114,10 +156,7 @@
 
         function addToCart(id) { 
             const item = menuItems.find(m => m.id === id);
-            if (item) {
-                cart.push(item); 
-                renderCart(); 
-            }
+            if (item) { cart.push(item); renderCart(); }
         }
 
         function renderCart() {
@@ -140,7 +179,6 @@
         function toggleCustomerQR() {
             const method = document.getElementById('payment-method').value;
             const qrBox = document.getElementById('qr-display-box');
-            const ownerQR = localStorage.getItem('restaurantQR');
             if (method === 'Online' && ownerQR) {
                 document.getElementById('customer-qr-img').src = ownerQR;
                 qrBox.classList.remove('hidden');
@@ -161,28 +199,32 @@
             if (cart.length === 0 || !name) return alert("Please add items to your cart and enter your name.");
 
             const total = cart.reduce((sum, item) => sum + parseFloat(item.price), 0);
+            const orderId = Date.now();
+            
             const newOrder = { 
-                id: Date.now(), 
+                id: orderId, 
                 customer: name, 
                 items: [...cart], 
-                total, 
+                total: total, 
                 time: new Date().toLocaleTimeString(), 
                 payment: method, 
-                utr, 
+                utr: utr, 
                 status: 'pending' 
             };
 
-            orders.push(newOrder);
-            localStorage.setItem('restaurantOrders', JSON.stringify(orders));
-            myOrderIds.push(newOrder.id);
-            sessionStorage.setItem('myOrders', JSON.stringify(myOrderIds));
-
-            showToast("Order Placed Successfully!");
-            cart = []; 
-            document.getElementById('customer-name').value = ''; 
-            if(document.getElementById('customer-utr')) document.getElementById('customer-utr').value = '';
-            renderCart(); 
-            checkCustomerOrderUpdates();
+            // PUSH ORDER TO THE CLOUD DATABASE
+            database.ref('orders/' + orderId).set(newOrder).then(() => {
+                myOrderIds.push(orderId);
+                sessionStorage.setItem('myOrders', JSON.stringify(myOrderIds));
+                
+                showToast("Order Placed Successfully!");
+                cart = []; 
+                document.getElementById('customer-name').value = ''; 
+                if(document.getElementById('customer-utr')) document.getElementById('customer-utr').value = '';
+                renderCart();
+            }).catch((error) => {
+                alert("Error placing order: " + error.message);
+            });
         }
 
         function checkCustomerOrderUpdates() {
@@ -191,7 +233,7 @@
             let hasActive = false;
 
             myOrderIds.forEach(id => {
-                const order = orders.find(o => o.id === id);
+                const order = allOrders.find(o => o.id === id);
                 if (order) {
                     hasActive = true;
                     html += `
@@ -210,9 +252,7 @@
             });
 
             statusDiv.innerHTML = html;
-            if (hasActive) {
-                document.getElementById('customer-status-section').classList.remove('hidden');
-            }
+            if (hasActive) { document.getElementById('customer-status-section').classList.remove('hidden'); }
         }
 
         function showToast(msg) {
@@ -221,22 +261,6 @@
             toast.className = "show";
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 4000);
         }
-
-        // LIVE SYNC: Listens for changes made by the Owner tab
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'restaurantOrders') { 
-                orders = JSON.parse(e.newValue || '[]'); 
-                checkCustomerOrderUpdates(); 
-            }
-            if (e.key === 'restaurantMenu') { 
-                menuItems = JSON.parse(e.newValue || '[]'); 
-                renderMenu(); 
-            }
-        });
-
-        renderMenu(); 
-        renderCart();
-        checkCustomerOrderUpdates();
     </script>
 </body>
 </html>
