@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickBite - Order Here</title>
+    <style>
+        /* Shared Styles */
+        :root { --primary: #ff4757; --success: #2ed573; --warning: #ffa502; --dark: #2f3542; --light: #f1f2f6; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--light); color: var(--dark); }
+        header { background-color: var(--primary); color: white; padding: 1rem; text-align: center; }
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        .hidden { display: none !important; }
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .menu-card { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; display: flex; flex-direction: column; justify-content: space-between; }
+        .menu-card img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; }
+        .menu-card h3 { margin: 10px 0 5px 0; }
+        .menu-card .desc { font-size: 0.9rem; color: #57606f; margin-bottom: 10px; min-height: 38px; }
+        .menu-card .price { font-size: 1.2rem; color: var(--primary); font-weight: bold; margin-bottom: 10px; }
+        button.action-btn { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 10px; }
+        button.action-btn:hover { background: #ff6b81; }
+        .cart-section { background: white; padding: 20px; border-radius: 8px; margin-top: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        .order-card { border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 4px; background-color: #fff; }
+        .status-badge { padding: 5px 10px; border-radius: 20px; color: white; font-size: 0.9rem; font-weight: bold; }
+        .status-pending { background-color: var(--warning); }
+        .status-processing { background-color: #1e90ff; }
+        .status-completed { background-color: var(--success); }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 8px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        #qr-display-box { text-align: center; padding: 15px; background: var(--light); border-radius: 8px; margin-bottom: 15px; }
+        #qr-display-box img { max-width: 200px; border: 2px solid var(--dark); border-radius: 8px; margin-top: 10px; }
+        #toast { visibility: hidden; min-width: 250px; background-color: var(--dark); color: #fff; text-align: center; border-radius: 4px; padding: 16px; position: fixed; right: 20px; bottom: 20px; font-size: 17px; z-index: 1000; }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 4.5s; }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 20px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 20px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+    </style>
+</head>
+<body>
+    <header>
+        <h2>🍔 QuickBite Menu</h2>
+    </header>
+
+    <div class="container">
+        <h2>Our Menu</h2>
+        <div class="menu-grid" id="customer-menu-grid"></div>
+
+        <div class="cart-section">
+            <h2>Your Order Cart</h2>
+            <ul id="cart-items"></ul>
+            <h3>Total: ₹<span id="cart-total">0.00</span></h3>
+            
+            <div class="form-group">
+                <label>Payment Method</label>
+                <select id="payment-method" onchange="toggleCustomerQR()">
+                    <option value="Cash">💵 Cash</option>
+                    <option value="Online">📱 Online Payment</option>
+                </select>
+            </div>
+
+            <div id="qr-display-box" class="hidden">
+                <strong>Scan to Pay:</strong><br>
+                <img id="customer-qr-img" src="" alt="Payment QR Code">
+                <div class="form-group" style="margin-top: 15px; text-align: left;">
+                    <label>UTR No. / Ref. ID (Optional)</label>
+                    <input type="text" id="customer-utr" placeholder="Enter transaction reference">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <input type="text" id="customer-name" placeholder="Enter your name to place order">
+            </div>
+            <button class="action-btn" onclick="placeOrder()">Place Order</button>
+        </div>
+
+        <div id="customer-status-section" class="cart-section hidden">
+            <h2>Track Your Active Orders</h2>
+            <div id="customer-status-list"></div>
+        </div>
+    </div>
+    <div id="toast">Message goes here...</div>
+
+    <script>
+        let menuItems = JSON.parse(localStorage.getItem('restaurantMenu')) || [
+            { id: 1, name: "Classic Burger", desc: "Juicy burger with fresh toppings.", price: 149.00, img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&q=80" },
+            { id: 2, name: "Margherita Pizza", desc: "Loaded with fresh mozzarella cheese.", price: 299.00, img: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=500&q=80" }
+        ];
+        let orders = JSON.parse(localStorage.getItem('restaurantOrders')) || [];
+        let cart = [];
+        let myOrderIds = JSON.parse(sessionStorage.getItem('myOrders')) || [];
+        let notifiedOrders = JSON.parse(sessionStorage.getItem('notifiedOrders')) || [];
+
+        function renderMenu() {
+            const grid = document.getElementById('customer-menu-grid');
+            grid.innerHTML = '';
+            menuItems.forEach(item => {
+                const desc = item.desc ? item.desc : '';
+                grid.innerHTML += `
+                    <div class="menu-card">
+                        <div>
+                            <img src="${item.img}" onerror="this.src='https://via.placeholder.com/300?text=No+Image'">
+                            <h3>${item.name}</h3>
+                            <div class="desc">${desc}</div>
+                        </div>
+                        <div>
+                            <div class="price">₹${item.price.toFixed(2)}</div>
+                            <button class="action-btn" onclick="addToCart(${item.id})">Add to Order</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function addToCart(id) { 
+            const item = menuItems.find(m => m.id === id);
+            if (item) {
+                cart.push(item); 
+                renderCart(); 
+            }
+        }
+
+        function renderCart() {
+            const cartUl = document.getElementById('cart-items');
+            cartUl.innerHTML = '';
+            let total = 0;
+            if (cart.length === 0) {
+                cartUl.innerHTML = '<li style="color: #7f8c8d;">Your cart is empty.</li>';
+            } else {
+                cart.forEach((item, index) => {
+                    total += parseFloat(item.price);
+                    cartUl.innerHTML += `<li><span>${item.name}</span><span>₹${item.price.toFixed(2)} <button onclick="removeFromCart(${index})" style="color:red;border:none;background:none;cursor:pointer;font-weight:bold;margin-left:10px;">✕</button></span></li>`;
+                });
+            }
+            document.getElementById('cart-total').innerText = total.toFixed(2);
+        }
+
+        function removeFromCart(index) { cart.splice(index, 1); renderCart(); }
+
+        function toggleCustomerQR() {
+            const method = document.getElementById('payment-method').value;
+            const qrBox = document.getElementById('qr-display-box');
+            const ownerQR = localStorage.getItem('restaurantQR');
+            if (method === 'Online' && ownerQR) {
+                document.getElementById('customer-qr-img').src = ownerQR;
+                qrBox.classList.remove('hidden');
+            } else if (method === 'Online' && !ownerQR) {
+                alert("QR payment is not set up by the restaurant. Please choose Cash.");
+                document.getElementById('payment-method').value = 'Cash';
+                qrBox.classList.add('hidden');
+            } else { 
+                qrBox.classList.add('hidden'); 
+            }
+        }
+
+        function placeOrder() {
+            const name = document.getElementById('customer-name').value.trim();
+            const method = document.getElementById('payment-method').value;
+            const utr = document.getElementById('customer-utr')?.value.trim() || "";
+
+            if (cart.length === 0 || !name) return alert("Please add items to your cart and enter your name.");
+
+            const total = cart.reduce((sum, item) => sum + parseFloat(item.price), 0);
+            const newOrder = { 
+                id: Date.now(), 
+                customer: name, 
+                items: [...cart], 
+                total, 
+                time: new Date().toLocaleTimeString(), 
+                payment: method, 
+                utr, 
+                status: 'pending' 
+            };
+
+            orders.push(newOrder);
+            localStorage.setItem('restaurantOrders', JSON.stringify(orders));
+            myOrderIds.push(newOrder.id);
+            sessionStorage.setItem('myOrders', JSON.stringify(myOrderIds));
+
+            showToast("Order Placed Successfully!");
+            cart = []; 
+            document.getElementById('customer-name').value = ''; 
+            if(document.getElementById('customer-utr')) document.getElementById('customer-utr').value = '';
+            renderCart(); 
+            checkCustomerOrderUpdates();
+        }
+
+        function checkCustomerOrderUpdates() {
+            const statusDiv = document.getElementById('customer-status-list');
+            let html = ''; 
+            let hasActive = false;
+
+            myOrderIds.forEach(id => {
+                const order = orders.find(o => o.id === id);
+                if (order) {
+                    hasActive = true;
+                    html += `
+                        <div class="order-card">
+                            <strong>Order #${order.id.toString().slice(-4)}</strong> 
+                            <span style="float:right;" class="status-badge status-${order.status}">${order.status.toUpperCase()}</span>
+                            <br><small><strong>Items:</strong> ${order.items.map(i=>i.name).join(', ')}</small>
+                            <br><small><strong>Total:</strong> ₹${order.total.toFixed(2)}</small>
+                        </div>`;
+                    if (order.status === 'completed' && !notifiedOrders.includes(id)) {
+                        showToast("🍔 Your order is ready!");
+                        notifiedOrders.push(id); 
+                        sessionStorage.setItem('notifiedOrders', JSON.stringify(notifiedOrders));
+                    }
+                }
+            });
+
+            statusDiv.innerHTML = html;
+            if (hasActive) {
+                document.getElementById('customer-status-section').classList.remove('hidden');
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById("toast"); 
+            toast.innerText = msg; 
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 4000);
+        }
+
+        // LIVE SYNC: Listens for changes made by the Owner tab
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'restaurantOrders') { 
+                orders = JSON.parse(e.newValue || '[]'); 
+                checkCustomerOrderUpdates(); 
+            }
+            if (e.key === 'restaurantMenu') { 
+                menuItems = JSON.parse(e.newValue || '[]'); 
+                renderMenu(); 
+            }
+        });
+
+        renderMenu(); 
+        renderCart();
+        checkCustomerOrderUpdates();
+    </script>
+</body>
+</html>

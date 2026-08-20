@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Restaurant Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body, html {
+            height: 100%;
+            font-family: 'Poppins', sans-serif;
+        }
+        .hero-section {
+            height: 100vh;
+            /* High-quality Unsplash image with a dark overlay for text readability */
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)), 
+                        url('https://images.unsplash.com/photo-1514933651103-005eec06c04b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+        }
+        .title {
+            font-size: 3.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        .subtitle {
+            font-size: 1.2rem;
+            font-weight: 300;
+            margin-bottom: 60px;
+            color: #e0e0e0;
+        }
+        .action-container {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .btn-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px 30px;
+            border-radius: 20px;
+            width: 260px;
+            cursor: pointer;
+            transition: transform 0.4s ease, background 0.4s ease, box-shadow 0.4s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+        .btn-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+        }
+        .icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+        .btn-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .btn-desc {
+            font-size: 0.9rem;
+            font-weight: 300;
+            color: #cccccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero-section">
+        <h1 class="title">"Love at first bite"</h1>
+        <p class="subtitle">Experience fine dining or manage your restaurant operations.</p>
+        
+        <div class="action-container">
+            <!-- Order Food Option -->
+            <div class="btn-card" onclick="scanToOrder()">
+                <div class="icon">📱</div>
+                <div class="btn-title">Make Order</div>
+                <p class="btn-desc">Browse our digital menu and place your order instantly.</p>
+            </div>
+            
+            <!-- Admin Panel Option -->
+            <div class="btn-card" onclick="openAdminPanel()">
+                <div class="icon">🔒</div>
+                <div class="btn-title">Admin Panel</div>
+                <p class="btn-desc">Access management tools and oversee active orders.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function scanToOrder() {
+            // Redirects the user directly to the menu page
+            window.location.href = "menu.html";
+        }
+
+        function openAdminPanel() {
+            // Redirects directly to the admin page without any password prompt
+            window.location.href = "admin.html";
+        }
+    </script>
+</body>
+</html>
