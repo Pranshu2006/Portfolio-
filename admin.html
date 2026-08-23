@@ -4,12 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QuickBite - Owner Portal</title>
+    
     <!-- ADDING FIREBASE LIBRARIES -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
+    <!-- ADDING CROPPER.JS LIBRARIES -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
     <style>
-        /* Shared Styles (Unchanged) */
+        /* Shared Styles */
         :root { --primary: #ff4757; --secondary: #1e90ff; --success: #2ed573; --warning: #ffa502; --dark: #2f3542; --light: #f1f2f6; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--light); color: var(--dark); }
         header { background-color: var(--dark); color: white; padding: 1rem; text-align: center; }
@@ -21,7 +26,7 @@
         .dashboard-section { display: flex; justify-content: space-around; background: var(--dark); color: white; padding: 20px; border-radius: 8px; margin-top: 20px;}
         .dashboard-card { text-align: center; padding: 10px; width: 30%; }
         .dashboard-card .amount { font-size: 2rem; font-weight: bold; color: var(--success); }
-        button.action-btn { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 10px; }
+        button.action-btn { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 10px; font-weight: bold; }
         button.process-btn { background: var(--secondary); }
         button.complete-btn { background: var(--success); }
         button.edit-btn { background: var(--warning); color: #fff;}
@@ -31,9 +36,18 @@
         .status-pending { background-color: var(--warning); }
         .status-processing { background-color: var(--secondary); }
         .status-completed { background-color: var(--success); }
+        
+        /* Updated Menu Card CSS to Auto-Adjust Images */
         .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
         .menu-card { background: white; border-radius: 8px; padding: 15px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
-        .menu-card img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; }
+        .menu-card img { 
+            width: 100%; 
+            height: 200px; 
+            object-fit: contain; /* Ensures the whole image is visible without getting cut off */
+            background-color: #e2e8f0; /* Subtle background for images that don't fill the box */
+            border-radius: 8px; 
+        }
+        
         .menu-card h3 { margin: 10px 0 5px 0; }
         .menu-card .desc { font-size: 0.9rem; color: #57606f; margin-bottom: 10px; height: 40px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
         .menu-card .price { font-weight: bold; font-size: 1.2rem; color: var(--success); }
@@ -45,6 +59,11 @@
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 4.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 20px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 20px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        
+        /* Cropper container style */
+        .img-container { max-height: 400px; width: 100%; margin-bottom: 15px; }
+        .img-container img { max-width: 100%; display: block; }
+        .success-text { color: var(--success); font-weight: bold; font-size: 0.9rem; margin-left: 10px; }
     </style>
 </head>
 <body>
@@ -121,8 +140,9 @@
             <div class="form-group"><textarea id="new-item-desc" placeholder="Food Description" rows="2"></textarea></div>
             <div class="form-group"><input type="number" id="new-item-price" placeholder="Price (₹)" step="1"></div>
             <div class="form-group">
-                <label style="display: block; font-size: 0.9rem; margin-bottom: 5px;">Upload Food Image:</label>
+                <label style="display: block; font-size: 0.9rem; margin-bottom: 5px;">Upload & Crop Food Image:</label>
                 <input type="file" id="new-item-img-file" accept="image/*">
+                <span id="new-item-crop-status" class="success-text hidden">✓ Image Processed</span>
             </div>
             <button class="action-btn complete-btn" onclick="addItem()">+ Add to Menu</button>
         </div>
@@ -156,10 +176,29 @@
             <div class="form-group"><label>Name:</label><input type="text" id="edit-item-name"></div>
             <div class="form-group"><label>Description:</label><textarea id="edit-item-desc" rows="3"></textarea></div>
             <div class="form-group"><label>Price (₹):</label><input type="number" id="edit-item-price" step="1"></div>
-            <div class="form-group"><label>Update Image (Optional):</label><input type="file" id="edit-item-img-file" accept="image/*"></div>
+            <div class="form-group">
+                <label>Update Image (Optional):</label>
+                <input type="file" id="edit-item-img-file" accept="image/*">
+                <div id="edit-item-crop-status" class="success-text hidden">✓ New Image Processed</div>
+            </div>
             <div style="display: flex; gap: 10px;">
                 <button class="action-btn complete-btn" onclick="saveEditedItem()">Save Changes</button>
                 <button class="action-btn delete-btn" onclick="closeEditModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Cropper Modal -->
+    <div id="cropper-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 600px;">
+            <h2 style="margin-top: 0;">Process Image</h2>
+            <div class="img-container">
+                <img id="image-to-crop" src="">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="action-btn complete-btn" id="crop-btn" onclick="performCrop()">Crop Image</button>
+                <button class="action-btn process-btn" onclick="useFullImage()">Use Full Image</button>
+                <button class="action-btn delete-btn" onclick="closeCropperModal()">Cancel</button>
             </div>
         </div>
     </div>
@@ -186,6 +225,13 @@
         let orders = []; 
         let currentOrderCount = 0;
 
+        // Cropper Variables
+        let cropper = null;
+        let cropTarget = ''; // Will track if we are cropping for 'new' or 'edit'
+        let originalImageData = null; // Holds the uncropped raw image data
+        let croppedImageDataForNew = null;
+        let croppedImageDataForEdit = null;
+
         function checkLogin() {
             const pass = document.getElementById('owner-password').value;
             if (pass === 'admin123') { 
@@ -193,7 +239,6 @@
                 document.getElementById('owner-dashboard').classList.remove('hidden');
                 initFirebaseListeners();
                 
-                // Set default month and year in the historical search bar
                 document.getElementById('search-year').value = new Date().getFullYear();
                 document.getElementById('search-month').value = new Date().getMonth();
             } else {
@@ -203,19 +248,16 @@
 
         // --- FIREBASE LIVE LISTENERS ---
         function initFirebaseListeners() {
-            // Listen to Menu changes
             database.ref('menu').on('value', (snapshot) => {
                 const data = snapshot.val();
                 menuItems = data ? Object.values(data) : [];
                 renderMenu();
             });
 
-            // Listen to Orders changes
             database.ref('orders').on('value', (snapshot) => {
                 const data = snapshot.val();
                 orders = data ? Object.values(data) : [];
                 
-                // Alert if new order came in
                 if (orders.length > currentOrderCount && currentOrderCount > 0) {
                     showToast();
                 }
@@ -225,7 +267,6 @@
                 renderSales();
             });
 
-            // Listen to QR Code
             database.ref('settings/qrCode').on('value', (snapshot) => {
                 const qrUrl = snapshot.val();
                 const previewBox = document.getElementById('owner-qr-display');
@@ -239,13 +280,96 @@
             });
         }
 
+        // --- IMAGE CROPPER LOGIC ---
+        document.getElementById('new-item-img-file').addEventListener('change', function(e) {
+            handleFileSelect(e, 'new');
+        });
+        
+        document.getElementById('edit-item-img-file').addEventListener('change', function(e) {
+            handleFileSelect(e, 'edit');
+        });
+
+        function handleFileSelect(event, targetContext) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    cropTarget = targetContext;
+                    originalImageData = e.target.result; // Store the original to use later if requested
+                    openCropperModal(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function openCropperModal(imgSrc) {
+            document.getElementById('cropper-modal').classList.remove('hidden');
+            const image = document.getElementById('image-to-crop');
+            image.src = imgSrc;
+            
+            // Destroy existing cropper instance if present
+            if (cropper) { cropper.destroy(); }
+            
+            // Initialize Cropper.js without forcing an aspect ratio
+            cropper = new Cropper(image, {
+                viewMode: 1,
+                autoCropArea: 1, // Automatically highlights the full image at start
+                // aspectRatio parameter is removed so the user can crop any shape freely
+            });
+        }
+
+        function closeCropperModal() {
+            document.getElementById('cropper-modal').classList.add('hidden');
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+            
+            // If they cancelled without processing, clear the file inputs
+            if(cropTarget === 'new' && !croppedImageDataForNew) {
+                document.getElementById('new-item-img-file').value = '';
+            } else if (cropTarget === 'edit' && !croppedImageDataForEdit) {
+                document.getElementById('edit-item-img-file').value = '';
+            }
+        }
+
+        function performCrop() {
+            if (cropper) {
+                // Resize for storage limit optimizations while keeping quality
+                const canvas = cropper.getCroppedCanvas({ maxWidth: 800, maxHeight: 800 });
+                const base64String = canvas.toDataURL('image/jpeg', 0.8);
+                
+                setSuccessState(base64String, "✓ Image Cropped");
+                closeCropperModal();
+            }
+        }
+
+        function useFullImage() {
+            // Simply use the unedited original image
+            setSuccessState(originalImageData, "✓ Full Image Added");
+            closeCropperModal();
+        }
+        
+        function setSuccessState(imageData, message) {
+            if (cropTarget === 'new') {
+                croppedImageDataForNew = imageData;
+                let statusMsg = document.getElementById('new-item-crop-status');
+                statusMsg.innerText = message;
+                statusMsg.classList.remove('hidden');
+            } else if (cropTarget === 'edit') {
+                croppedImageDataForEdit = imageData;
+                let statusMsg = document.getElementById('edit-item-crop-status');
+                statusMsg.innerText = message;
+                statusMsg.classList.remove('hidden');
+            }
+        }
+
         // --- ORDER MANAGEMENT ---
         function renderOrders() {
             const div = document.getElementById('orders-list'); 
             div.innerHTML = '';
             if (orders.length === 0) return div.innerHTML = '<p>No orders yet.</p>';
             
-            // Sort to show newest first
             [...orders].sort((a, b) => b.id - a.id).forEach(o => {
                 let btn = o.status === 'pending' ? `<button class="action-btn process-btn" onclick="updateStatus(${o.id}, 'processing')">Confirm Order</button>` 
                         : o.status === 'processing' ? `<button class="action-btn complete-btn" onclick="updateStatus(${o.id}, 'completed')">Mark Ready</button>` 
@@ -265,7 +389,6 @@
         }
 
         function updateStatus(id, status) {
-            // Update the specific order in Firebase
             database.ref('orders/' + id).update({ status: status });
         }
 
@@ -284,7 +407,7 @@
                     allTimeTotal += parseFloat(order.total);
                     allTimeCount++;
                     
-                    const saleDate = new Date(order.id); // Using timestamp ID as date
+                    const saleDate = new Date(order.id); 
                     if (saleDate.toLocaleDateString() === todayStr) { 
                         todayTotal += parseFloat(order.total); todayCount++;
                     }
@@ -312,7 +435,7 @@
             
             orders.forEach(order => {
                 if (order.status === 'completed') {
-                    const d = new Date(order.id); // The order ID acts as the timestamp
+                    const d = new Date(order.id); 
                     if (d.getMonth() === m && d.getFullYear() === y) {
                         histTotal += parseFloat(order.total); 
                         histCount++;
@@ -351,15 +474,19 @@
             const name = document.getElementById('new-item-name').value;
             const desc = document.getElementById('new-item-desc').value;
             const price = parseFloat(document.getElementById('new-item-price').value);
-            const file = document.getElementById('new-item-img-file').files[0];
             
             if (!name || isNaN(price)) return alert("Valid name and price required.");
 
             const id = Date.now();
-            if (file) {
-                const r = new FileReader(); 
-                r.onload = e => pushItemToFirebase(id, name, desc, price, e.target.result); 
-                r.readAsDataURL(file);
+            
+            // Check if we have cropped data ready
+            if (croppedImageDataForNew) {
+                pushItemToFirebase(id, name, desc, price, croppedImageDataForNew);
+                
+                // Reset states
+                croppedImageDataForNew = null;
+                document.getElementById('new-item-img-file').value = '';
+                document.getElementById('new-item-crop-status').classList.add('hidden');
             } else { 
                 pushItemToFirebase(id, name, desc, price, "https://via.placeholder.com/300?text=No+Image"); 
             }
@@ -367,11 +494,9 @@
 
         function pushItemToFirebase(id, name, desc, price, img) {
             database.ref('menu/' + id).set({ id, name, desc, price, img });
-            // Clear inputs
             document.getElementById('new-item-name').value = ''; 
             document.getElementById('new-item-desc').value = ''; 
             document.getElementById('new-item-price').value = '';
-            document.getElementById('new-item-img-file').value = '';
         }
 
         function deleteItem(id) {
@@ -388,7 +513,12 @@
             document.getElementById('edit-item-name').value = item.name;
             document.getElementById('edit-item-desc').value = item.desc || '';
             document.getElementById('edit-item-price').value = item.price;
+            
+            // Reset crop states for modal
             document.getElementById('edit-item-img-file').value = ''; 
+            croppedImageDataForEdit = null;
+            document.getElementById('edit-item-crop-status').classList.add('hidden');
+
             document.getElementById('edit-modal').classList.remove('hidden');
         }
 
@@ -399,17 +529,14 @@
             const name = document.getElementById('edit-item-name').value;
             const desc = document.getElementById('edit-item-desc').value;
             const price = parseFloat(document.getElementById('edit-item-price').value);
-            const file = document.getElementById('edit-item-img-file').files[0];
             
             if (!name || isNaN(price)) return alert("Valid name and price required.");
 
-            if (file) {
-                const r = new FileReader();
-                r.onload = function(e) {
-                    database.ref('menu/' + id).update({ name, desc, price, img: e.target.result });
-                    closeEditModal();
-                };
-                r.readAsDataURL(file);
+            if (croppedImageDataForEdit) {
+                database.ref('menu/' + id).update({ name, desc, price, img: croppedImageDataForEdit });
+                croppedImageDataForEdit = null;
+                document.getElementById('edit-item-crop-status').classList.add('hidden');
+                closeEditModal();
             } else {
                 database.ref('menu/' + id).update({ name, desc, price });
                 closeEditModal();
