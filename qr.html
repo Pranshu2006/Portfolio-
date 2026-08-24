@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stylish QR Generator Pro - Working Files</title>
+    <!-- Upgraded Library for Stylish QR Codes -->
+    <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-light: #6b7280;
+            --border: #e5e7eb;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .container { background-color: var(--card-bg); width: 100%; max-width: 600px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); padding: 30px; }
+        h1 { text-align: center; font-size: 1.5rem; margin-bottom: 20px; }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab-btn { flex: 1; padding: 10px 15px; background: transparent; border: 2px solid var(--border); border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--text-light); transition: 0.3s; min-width: 80px; }
+        .tab-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .tab-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+
+        /* Inputs */
+        .input-section { display: none; margin-bottom: 20px; }
+        .input-section.active { display: block; }
+        textarea { width: 100%; height: 80px; padding: 12px; border: 2px solid var(--border); border-radius: 8px; resize: none; font-size: 1rem; outline: none; }
+        textarea:focus { border-color: var(--primary); }
+        
+        .file-upload-wrapper { border: 2px dashed var(--border); border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; }
+        .file-upload-wrapper:hover { border-color: var(--primary); }
+        input[type="file"] { display: none; }
+        .file-upload-label { cursor: pointer; color: var(--text-light); }
+
+        /* Design Panel */
+        .design-panel { background: #f9fafb; border: 1px solid var(--border); border-radius: 8px; padding: 15px; margin-bottom: 25px; }
+        .design-panel h3 { font-size: 1.1rem; margin-bottom: 15px; color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 5px;}
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .option { display: flex; flex-direction: column; gap: 5px; }
+        .option label { font-size: 0.85rem; font-weight: 600; color: var(--text-light); }
+        .option input[type="text"], .option select { padding: 8px; border: 1px solid var(--border); border-radius: 6px; outline: none; }
+        .option input[type="color"] { border: none; width: 100%; height: 35px; border-radius: 6px; cursor: pointer; background: transparent; }
+
+        /* Generate Button */
+        .generate-btn { width: 100%; padding: 15px; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.3s; margin-bottom: 25px; }
+        .generate-btn:hover { background-color: var(--primary-hover); }
+        .generate-btn:disabled { background-color: #9ca3af; cursor: not-allowed; }
+
+        /* Output */
+        .qr-output-container { display: none; flex-direction: column; align-items: center; gap: 15px; }
+        .qr-output-container.active { display: flex; }
+        .qr-frame { padding: 25px 25px 15px 25px; border-radius: 16px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.15); display: inline-block; transition: all 0.3s ease; }
+        .qr-text-display { font-size: 24px; font-weight: bold; margin-bottom: 15px; letter-spacing: 1px; transition: all 0.3s ease; }
+        #qrcode { background: white; padding: 10px; border-radius: 12px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Create Stylish QR Code</h1>
+    
+    <!-- Navigation Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="text">Text / URL</button>
+        <button class="tab-btn" data-tab="image">Image</button>
+        <button class="tab-btn" data-tab="pdf">PDF</button>
+        <button class="tab-btn" data-tab="doc">Document</button>
+    </div>
+
+    <!-- Inputs -->
+    <div id="text-section" class="input-section active">
+        <textarea id="text-input" placeholder="Enter your text or URL here..."></textarea>
+    </div>
+    <div id="image-section" class="input-section">
+        <div class="file-upload-wrapper">
+            <label class="file-upload-label">
+                <span>📁 Upload Image (JPG, PNG)</span>
+                <input type="file" id="image-input" accept="image/png, image/jpeg">
+            </label>
+        </div>
+        <p id="image-file-name" style="text-align:center; font-size:12px; margin-top:5px;"></p>
+    </div>
+    <div id="pdf-section" class="input-section">
+        <div class="file-upload-wrapper">
+            <label class="file-upload-label">
+                <span>📄 Upload PDF</span>
+                <input type="file" id="pdf-input" accept=".pdf">
+            </label>
+        </div>
+        <p id="pdf-file-name" style="text-align:center; font-size:12px; margin-top:5px;"></p>
+    </div>
+    <div id="doc-section" class="input-section">
+        <div class="file-upload-wrapper">
+            <label class="file-upload-label">
+                <span>📝 Upload Document</span>
+                <input type="file" id="doc-input" accept=".doc, .docx">
+            </label>
+        </div>
+        <p id="doc-file-name" style="text-align:center; font-size:12px; margin-top:5px;"></p>
+    </div>
+
+    <!-- DESIGN PANEL -->
+    <div class="design-panel">
+        <h3>🎨 Design & Customize</h3>
+        <div class="options-grid">
+            <div class="option">
+                <label>QR Template Style</label>
+                <select id="qr-template">
+                    <option value="square">Classic Squares</option>
+                    <option value="dots">Modern Dots</option>
+                    <option value="rounded">Smooth Rounded</option>
+                </select>
+            </div>
+            <div class="option">
+                <label>QR Dot Color</label>
+                <input type="color" id="qr-color" value="#000000">
+            </div>
+            <div class="option">
+                <label>Frame Text (Top)</label>
+                <input type="text" id="frame-text" value="SCAN ME">
+            </div>
+            <div class="option">
+                <label>Text Font Style</label>
+                <select id="text-font">
+                    <option value="Arial, sans-serif">Arial</option>
+                    <option value="'Courier New', Courier, monospace">Typewriter</option>
+                    <option value="Impact, fantasy">Impact</option>
+                    <option value="'Comic Sans MS', cursive">Casual</option>
+                </select>
+            </div>
+            <div class="option">
+                <label>Frame Color</label>
+                <input type="color" id="frame-color" value="#4f46e5">
+            </div>
+            <div class="option">
+                <label>Text Color</label>
+                <input type="color" id="text-color" value="#ffffff">
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Button -->
+    <button class="generate-btn" id="generate-btn">Generate Stylish QR Code</button>
+
+    <!-- Output Section -->
+    <div class="qr-output-container" id="qr-output-container">
+        <div class="qr-frame" id="qr-frame" style="background-color: #4f46e5;">
+            <div class="qr-text-display" id="qr-text-display" style="color: #ffffff;">SCAN ME</div>
+            <div id="qrcode"></div>
+        </div>
+        <p style="color: var(--text-light); font-size: 0.9rem; text-align: center; margin-top: 10px;">
+            Right-click or long-press the QR code to save it.
+        </p>
+    </div>
+</div>
+
+<script>
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const inputSections = document.querySelectorAll('.input-section');
+    const generateBtn = document.getElementById('generate-btn');
+    let currentMode = 'text'; 
+
+    // Tab Logic
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            tabBtns.forEach(b => b.classList.remove('active'));
+            inputSections.forEach(s => s.classList.remove('active'));
+            btn.classList.add('active');
+            currentMode = btn.getAttribute('data-tab');
+            document.getElementById(`${currentMode}-section`).classList.add('active');
+            document.getElementById('qr-output-container').classList.remove('active');
+        });
+    });
+
+    // Show selected file names
+    ['image', 'pdf', 'doc'].forEach(type => {
+        document.getElementById(`${type}-input`).addEventListener('change', function() {
+            if(this.files && this.files[0]) {
+                document.getElementById(`${type}-file-name`).innerText = `Selected: ${this.files[0].name}`;
+            }
+        });
+    });
+
+    // Initialize QR Code Library
+    const qrCode = new QRCodeStyling({
+        width: 220, height: 220, type: "svg", margin: 0,
+        qrOptions: { errorCorrectionLevel: 'H' },
+        backgroundOptions: { color: "#ffffff" }
+    });
+
+    // Upload function using tmpfiles.org API
+    async function uploadFileToCloud(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        try {
+            const response = await fetch('https://tmpfiles.org/api/v1/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            if(data.status === 'success') {
+                // Convert the view URL to a direct download URL
+                const viewUrl = data.data.url;
+                return viewUrl.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+            } else {
+                throw new Error("Upload failed");
+            }
+        } catch (error) {
+            console.error("Upload Error:", error);
+            return null;
+        }
+    }
+
+    // Generate Button Logic
+    generateBtn.addEventListener('click', async () => {
+        let contentToEncode = "";
+
+        // Handle Input Data
+        if (currentMode === 'text') {
+            const textValue = document.getElementById('text-input').value.trim();
+            if (!textValue) return alert("Please enter text or a URL.");
+            contentToEncode = textValue;
+        } else {
+            const fileInput = document.getElementById(`${currentMode}-input`);
+            if (!fileInput.files || fileInput.files.length === 0) return alert("Please select a file first.");
+            
+            // UI Feedback during upload
+            const originalBtnText = generateBtn.innerText;
+            generateBtn.innerText = "Uploading to Cloud... Please wait";
+            generateBtn.disabled = true;
+
+            // Upload the file
+            const file = fileInput.files[0];
+            const uploadedUrl = await uploadFileToCloud(file);
+
+            generateBtn.innerText = originalBtnText;
+            generateBtn.disabled = false;
+
+            if (!uploadedUrl) return alert("Failed to upload file. Please check your internet connection or try a local server.");
+            contentToEncode = uploadedUrl;
+        }
+
+        // Apply Design Settings
+        const qrTemplate = document.getElementById('qr-template').value;
+        const qrColor = document.getElementById('qr-color').value;
+        const frameText = document.getElementById('frame-text').value;
+        const textFont = document.getElementById('text-font').value;
+        const frameColor = document.getElementById('frame-color').value;
+        const textColor = document.getElementById('text-color').value;
+
+        // Apply Frame UI
+        const frameEl = document.getElementById('qr-frame');
+        const textDisplayEl = document.getElementById('qr-text-display');
+        frameEl.style.backgroundColor = frameColor;
+        
+        if (frameText.trim() === "") {
+            textDisplayEl.style.display = "none";
+        } else {
+            textDisplayEl.style.display = "block";
+            textDisplayEl.innerText = frameText;
+            textDisplayEl.style.color = textColor;
+            textDisplayEl.style.fontFamily = textFont;
+        }
+
+        // Update & Render QR
+        qrCode.update({
+            data: contentToEncode,
+            dotsOptions: { color: qrColor, type: qrTemplate },
+            cornersSquareOptions: { type: qrTemplate === 'dots' ? 'dot' : (qrTemplate === 'rounded' ? 'extra-rounded' : 'square') }
+        });
+
+        document.getElementById('qrcode').innerHTML = ""; 
+        qrCode.append(document.getElementById('qrcode'));
+        document.getElementById('qr-output-container').classList.add('active');
+    });
+</script>
+
+</body>
+</html>
