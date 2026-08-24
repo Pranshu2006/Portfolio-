@@ -28,11 +28,14 @@
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
         .form-group input, .form-group select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        
+        /* Matched Order Card CSS with Admin Panel */
         .order-card { border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 4px; background-color: #fff; }
         .status-badge { padding: 5px 10px; border-radius: 20px; color: white; font-size: 0.9rem; font-weight: bold; }
         .status-pending { background-color: var(--warning); }
         .status-processing { background-color: #1e90ff; }
         .status-completed { background-color: var(--success); }
+        
         ul { list-style-type: none; padding: 0; }
         li { padding: 8px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
         #qr-display-box { text-align: center; padding: 15px; background: var(--light); border-radius: 8px; margin-bottom: 15px; }
@@ -81,26 +84,27 @@
         </div>
 
         <div id="customer-status-section" class="cart-section hidden">
-            <h2>Track Your Active Orders</h2>
+            <h2>Track Live Orders (All Customers)</h2>
             <div id="customer-status-list"></div>
         </div>
     </div>
+    
     <div id="toast">Message goes here...</div>
 
-    <script>
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyBhR4jU9Ipfe9ZC1QDUbsEHIyMNPnnrrv0",
-  authDomain: "restraint-management.firebaseapp.com",
-  databaseURL: "https://restraint-management-default-rtdb.firebaseio.com",
-  projectId: "restraint-management",
-  storageBucket: "restraint-management.firebasestorage.app",
-  messagingSenderId: "227363602748",
-  appId: "1:227363602748:web:6c994ea883f66f74475e39",
-  measurementId: "G-897G5QSPKB"
-};
-        // =====================================================================
+    <!-- Audio Element for Order Ready Notification -->
+    <audio id="ready-sound" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3" preload="auto"></audio>
 
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBhR4jU9Ipfe9ZC1QDUbsEHIyMNPnnrrv0",
+            authDomain: "restraint-management.firebaseapp.com",
+            databaseURL: "https://restraint-management-default-rtdb.firebaseio.com",
+            projectId: "restraint-management",
+            storageBucket: "restraint-management.firebasestorage.app",
+            messagingSenderId: "227363602748",
+            appId: "1:227363602748:web:6c994ea883f66f74475e39",
+            measurementId: "G-897G5QSPKB"
+        };
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
@@ -110,7 +114,6 @@ const firebaseConfig = {
         let cart = [];
         let ownerQR = null;
         
-        let myOrderIds = JSON.parse(sessionStorage.getItem('myOrders')) || [];
         let notifiedOrders = JSON.parse(sessionStorage.getItem('notifiedOrders')) || [];
 
         // --- FETCH CLOUD DATA ---
@@ -214,9 +217,6 @@ const firebaseConfig = {
 
             // PUSH ORDER TO THE CLOUD DATABASE
             database.ref('orders/' + orderId).set(newOrder).then(() => {
-                myOrderIds.push(orderId);
-                sessionStorage.setItem('myOrders', JSON.stringify(myOrderIds));
-                
                 showToast("Order Placed Successfully!");
                 cart = []; 
                 document.getElementById('customer-name').value = ''; 
@@ -227,39 +227,51 @@ const firebaseConfig = {
             });
         }
 
+        // Display ALL live orders across all devices
         function checkCustomerOrderUpdates() {
             const statusDiv = document.getElementById('customer-status-list');
             let html = ''; 
-            let hasActive = false;
+            
+            if (allOrders.length === 0) {
+                statusDiv.innerHTML = '<p>No active orders right now.</p>';
+                document.getElementById('customer-status-section').classList.remove('hidden');
+                return;
+            }
 
-            myOrderIds.forEach(id => {
-                const order = allOrders.find(o => o.id === id);
-                if (order) {
-                    hasActive = true;
-                    html += `
-                        <div class="order-card">
-                            <strong>Order #${order.id.toString().slice(-4)}</strong> 
-                            <span style="float:right;" class="status-badge status-${order.status}">${order.status.toUpperCase()}</span>
-                            <br><small><strong>Items:</strong> ${order.items.map(i=>i.name).join(', ')}</small>
-                            <br><small><strong>Total:</strong> ₹${order.total.toFixed(2)}</small>
-                        </div>`;
-                    if (order.status === 'completed' && !notifiedOrders.includes(id)) {
-                        showToast("🍔 Your order is ready!");
-                        notifiedOrders.push(id); 
-                        sessionStorage.setItem('notifiedOrders', JSON.stringify(notifiedOrders));
-                    }
+            // Sort orders so newest are at the top, just like Admin Panel
+            [...allOrders].sort((a, b) => b.id - a.id).forEach(order => {
+                let utrDisplay = order.utr ? `<br><strong>UTR:</strong> <span style="color: var(--primary);">${order.utr}</span>` : '';
+
+                html += `
+                    <div class="order-card">
+                        <strong>Order #${order.id.toString().slice(-4)}</strong> 
+                        <span style="float:right;" class="status-badge status-${order.status}">${order.status.toUpperCase()}</span>
+                        <br><strong>Customer:</strong> ${order.customer} | <strong>Pay:</strong> ${order.payment} ${utrDisplay}
+                        <br><strong>Time:</strong> ${order.time}
+                        <br><strong>Items:</strong> ${order.items.map(i=>i.name).join(', ')} - <strong>Total:</strong> ₹${parseFloat(order.total).toFixed(2)}
+                    </div>`;
+                
+                // Trigger sound & notification on completion for EVERY device
+                if (order.status === 'completed' && !notifiedOrders.includes(order.id)) {
+                    showToast(`🍔 Order #${order.id.toString().slice(-4)} for ${order.customer} is ready!`);
+                    
+                    const sound = document.getElementById('ready-sound');
+                    sound.play().catch(err => console.log("Sound blocked by browser:", err));
+
+                    notifiedOrders.push(order.id); 
+                    sessionStorage.setItem('notifiedOrders', JSON.stringify(notifiedOrders));
                 }
             });
 
             statusDiv.innerHTML = html;
-            if (hasActive) { document.getElementById('customer-status-section').classList.remove('hidden'); }
+            document.getElementById('customer-status-section').classList.remove('hidden');
         }
 
         function showToast(msg) {
             const toast = document.getElementById("toast"); 
             toast.innerText = msg; 
             toast.className = "show";
-            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 4000);
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 5000);
         }
     </script>
 </body>
