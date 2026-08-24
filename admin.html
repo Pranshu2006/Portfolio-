@@ -43,8 +43,8 @@
         .menu-card img { 
             width: 100%; 
             height: 200px; 
-            object-fit: contain; /* Ensures the whole image is visible without getting cut off */
-            background-color: #e2e8f0; /* Subtle background for images that don't fill the box */
+            object-fit: contain; 
+            background-color: #e2e8f0; 
             border-radius: 8px; 
         }
         
@@ -71,7 +71,7 @@
 
     <div id="login-screen">
         <h2>Owner Login</h2>
-        <input type="password" id="owner-password" placeholder= "Enter Your Password">
+        <input type="password" id="owner-password" placeholder="Enter Your Password" onkeypress="if(event.key === 'Enter') checkLogin()">
         <button class="action-btn" onclick="checkLogin()">Login</button>
         <p id="login-error" style="color: red; display: none;">Incorrect password.</p>
     </div>
@@ -188,6 +188,22 @@
         </div>
     </div>
 
+    <!-- Edit Order Modal (NEW) -->
+    <div id="edit-order-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 style="margin-top: 0;">Edit Live Order</h2>
+            <input type="hidden" id="edit-order-id">
+            <div class="form-group"><label>Customer Name:</label><input type="text" id="edit-order-customer"></div>
+            <div class="form-group"><label>Payment Method:</label><input type="text" id="edit-order-payment"></div>
+            <div class="form-group"><label>UTR (Optional):</label><input type="text" id="edit-order-utr"></div>
+            <div class="form-group"><label>Total Price (₹):</label><input type="number" id="edit-order-total" step="1"></div>
+            <div style="display: flex; gap: 10px;">
+                <button class="action-btn complete-btn" onclick="saveEditedOrder()">Save Order</button>
+                <button class="action-btn delete-btn" onclick="closeEditOrderModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Image Cropper Modal -->
     <div id="cropper-modal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 600px;">
@@ -204,6 +220,9 @@
     </div>
 
     <div id="toast">🔔 New Order Received!</div>
+
+    <!-- Audio Element for Order Notifications -->
+    <audio id="order-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <script>
         const firebaseConfig = {
@@ -228,7 +247,7 @@
         // Cropper Variables
         let cropper = null;
         let cropTarget = ''; // Will track if we are cropping for 'new' or 'edit'
-        let originalImageData = null; // Holds the uncropped raw image data
+        let originalImageData = null; 
         let croppedImageDataForNew = null;
         let croppedImageDataForEdit = null;
 
@@ -260,6 +279,10 @@
                 
                 if (orders.length > currentOrderCount && currentOrderCount > 0) {
                     showToast();
+                    
+                    // Play the notification sound
+                    const sound = document.getElementById('order-sound');
+                    sound.play().catch(err => console.log("Sound blocked by browser:", err));
                 }
                 currentOrderCount = orders.length;
 
@@ -295,7 +318,7 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     cropTarget = targetContext;
-                    originalImageData = e.target.result; // Store the original to use later if requested
+                    originalImageData = e.target.result;
                     openCropperModal(e.target.result);
                 };
                 reader.readAsDataURL(file);
@@ -307,14 +330,11 @@
             const image = document.getElementById('image-to-crop');
             image.src = imgSrc;
             
-            // Destroy existing cropper instance if present
             if (cropper) { cropper.destroy(); }
             
-            // Initialize Cropper.js without forcing an aspect ratio
             cropper = new Cropper(image, {
                 viewMode: 1,
-                autoCropArea: 1, // Automatically highlights the full image at start
-                // aspectRatio parameter is removed so the user can crop any shape freely
+                autoCropArea: 1, 
             });
         }
 
@@ -325,7 +345,6 @@
                 cropper = null;
             }
             
-            // If they cancelled without processing, clear the file inputs
             if(cropTarget === 'new' && !croppedImageDataForNew) {
                 document.getElementById('new-item-img-file').value = '';
             } else if (cropTarget === 'edit' && !croppedImageDataForEdit) {
@@ -335,7 +354,6 @@
 
         function performCrop() {
             if (cropper) {
-                // Resize for storage limit optimizations while keeping quality
                 const canvas = cropper.getCroppedCanvas({ maxWidth: 800, maxHeight: 800 });
                 const base64String = canvas.toDataURL('image/jpeg', 0.8);
                 
@@ -345,7 +363,6 @@
         }
 
         function useFullImage() {
-            // Simply use the unedited original image
             setSuccessState(originalImageData, "✓ Full Image Added");
             closeCropperModal();
         }
@@ -371,9 +388,9 @@
             if (orders.length === 0) return div.innerHTML = '<p>No orders yet.</p>';
             
             [...orders].sort((a, b) => b.id - a.id).forEach(o => {
-                let btn = o.status === 'pending' ? `<button class="action-btn process-btn" onclick="updateStatus(${o.id}, 'processing')">Confirm Order</button>` 
-                        : o.status === 'processing' ? `<button class="action-btn complete-btn" onclick="updateStatus(${o.id}, 'completed')">Mark Ready</button>` 
-                        : `<span style="color:var(--success); font-weight:bold;">✓ Completed</span>`;
+                let btn = o.status === 'pending' ? `<button class="action-btn process-btn" style="margin-top:0; flex: 1;" onclick="updateStatus(${o.id}, 'processing')">Confirm</button>` 
+                        : o.status === 'processing' ? `<button class="action-btn complete-btn" style="margin-top:0; flex: 1;" onclick="updateStatus(${o.id}, 'completed')">Mark Ready</button>` 
+                        : `<span style="color:var(--success); font-weight:bold; align-self: center; flex: 1;">✓ Completed</span>`;
                 
                 let utrDisplay = o.utr ? `<br><strong>UTR:</strong> <span style="color: var(--primary);">${o.utr}</span>` : '';
 
@@ -383,13 +400,65 @@
                         <br><strong>Customer:</strong> ${o.customer} | <strong>Pay:</strong> ${o.payment} ${utrDisplay}
                         <br><strong>Time:</strong> ${o.time}
                         <br><strong>Items:</strong> ${o.items.map(i=>i.name).join(', ')} - <strong>Total:</strong> ₹${parseFloat(o.total).toFixed(2)}
-                        <br>${btn}
+                        
+                        <!-- Order Action Buttons -->
+                        <div style="display: flex; gap: 10px; margin-top: 15px;">
+                            ${btn}
+                            <button class="action-btn edit-btn" style="margin-top:0; flex: 0.5;" onclick="openEditOrderModal(${o.id})">Edit</button>
+                            <button class="action-btn delete-btn" style="margin-top:0; flex: 0.5;" onclick="deleteOrder(${o.id})">Delete</button>
+                        </div>
                     </div>`;
             });
         }
 
         function updateStatus(id, status) {
             database.ref('orders/' + id).update({ status: status });
+        }
+
+        // --- EDIT/DELETE ORDER FUNCTIONS (NEW) ---
+        function deleteOrder(id) {
+            if(confirm("Are you sure you want to permanently delete this order?")) {
+                database.ref('orders/' + id).remove();
+            }
+        }
+
+        function openEditOrderModal(id) {
+            const order = orders.find(o => o.id === id);
+            if (!order) return;
+
+            document.getElementById('edit-order-id').value = order.id;
+            document.getElementById('edit-order-customer').value = order.customer || '';
+            document.getElementById('edit-order-payment').value = order.payment || '';
+            document.getElementById('edit-order-utr').value = order.utr || '';
+            document.getElementById('edit-order-total').value = order.total || 0;
+
+            document.getElementById('edit-order-modal').classList.remove('hidden');
+        }
+
+        function closeEditOrderModal() {
+            document.getElementById('edit-order-modal').classList.add('hidden');
+        }
+
+        function saveEditedOrder() {
+            const id = document.getElementById('edit-order-id').value;
+            const customer = document.getElementById('edit-order-customer').value;
+            const payment = document.getElementById('edit-order-payment').value;
+            const utr = document.getElementById('edit-order-utr').value;
+            const total = parseFloat(document.getElementById('edit-order-total').value);
+
+            if (!customer || isNaN(total)) {
+                alert("Customer name and a valid total price are required.");
+                return;
+            }
+
+            database.ref('orders/' + id).update({
+                customer: customer,
+                payment: payment,
+                utr: utr,
+                total: total
+            });
+            
+            closeEditOrderModal();
         }
 
         // --- SALES ANALYTICS ---
@@ -479,11 +548,9 @@
 
             const id = Date.now();
             
-            // Check if we have cropped data ready
             if (croppedImageDataForNew) {
                 pushItemToFirebase(id, name, desc, price, croppedImageDataForNew);
                 
-                // Reset states
                 croppedImageDataForNew = null;
                 document.getElementById('new-item-img-file').value = '';
                 document.getElementById('new-item-crop-status').classList.add('hidden');
@@ -514,7 +581,6 @@
             document.getElementById('edit-item-desc').value = item.desc || '';
             document.getElementById('edit-item-price').value = item.price;
             
-            // Reset crop states for modal
             document.getElementById('edit-item-img-file').value = ''; 
             croppedImageDataForEdit = null;
             document.getElementById('edit-item-crop-status').classList.add('hidden');
