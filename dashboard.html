@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Restaurant Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body, html {
+            height: 100%;
+            font-family: 'Poppins', sans-serif;
+        }
+        .hero-section {
+            height: 100vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)), 
+                        url('https://images.unsplash.com/photo-1514933651103-005eec06c04b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+        }
+        .title {
+            font-size: 3.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        .subtitle {
+            font-size: 1.2rem;
+            font-weight: 300;
+            margin-bottom: 60px;
+            color: #e0e0e0;
+        }
+        .action-container {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .btn-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px 30px;
+            border-radius: 20px;
+            width: 260px;
+            cursor: pointer;
+            transition: transform 0.4s ease, background 0.4s ease, box-shadow 0.4s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+        .btn-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+        }
+        .icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+        .btn-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .btn-desc {
+            font-size: 0.9rem;
+            font-weight: 300;
+            color: #cccccc;
+        }
+
+        /* Password Modal Styling */
+        .auth-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .auth-box {
+            background: #ffffff;
+            color: #1f2937;
+            padding: 30px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .auth-box h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #111827;
+        }
+        .auth-box p {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+        .auth-box input {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            text-align: center;
+            letter-spacing: 2px;
+            outline: none;
+            margin-bottom: 10px;
+            font-family: inherit;
+        }
+        .auth-box input:focus {
+            border-color: #5856d6;
+        }
+        .auth-err {
+            color: #ef4444;
+            font-size: 0.78rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: none;
+        }
+        .auth-btn-row {
+            display: flex;
+            gap: 10px;
+        }
+        .auth-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .auth-btn-primary {
+            background: #5856d6;
+            color: white;
+        }
+        .auth-btn-primary:hover {
+            background: #4845c4;
+        }
+        .auth-btn-cancel {
+            background: #e5e7eb;
+            color: #4b5563;
+        }
+        .auth-btn-cancel:hover {
+            background: #d1d5db;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero-section">
+        <h1 class="title">"Learn More Grow More"</h1>
+        <p class="subtitle">Experience to Learn more skill .</p>
+        
+        <div class="action-container">
+            <!-- Order Food Option -->
+            <div class="btn-card" onclick="scanToOrder()">
+                <div class="icon">📱</div>
+                <div class="btn-title">Get Your Course</div>
+                <p class="btn-desc">Browse our digital learning Platform instantly.</p>
+            </div>
+            
+            <!-- Admin Panel Option -->
+            <div class="btn-card" onclick="openAdminPanel()">
+                <div class="icon">🔒</div>
+                <div class="btn-title">Admin Panel</div>
+                <p class="btn-desc">Access management tools and oversee active orders.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Modal -->
+    <div class="auth-overlay" id="adminAuthModal">
+        <div class="auth-box">
+            <div style="font-size: 2.2rem; margin-bottom: 8px;">🔐</div>
+            <h3>Admin Access</h3>
+            <p>Please enter the administrator password to continue.</p>
+            <form onsubmit="handleAdminAuth(event)">
+                <input type="password" id="adminPassInput" placeholder="Enter Password" required>
+                <div class="auth-err" id="authErrorMsg">Incorrect password! Try again.</div>
+                <div class="auth-btn-row">
+                    <button type="button" class="auth-btn auth-btn-cancel" onclick="closeAdminModal()">Cancel</button>
+                    <button type="submit" class="auth-btn auth-btn-primary">Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_PASSWORD = "admin123"; // Set your desired admin password here
+
+        function scanToOrder() {
+            window.location.href = "course user.html";
+        }
+
+        function openAdminPanel() {
+            // Display password modal
+            document.getElementById('adminPassInput').value = '';
+            document.getElementById('authErrorMsg').style.display = 'none';
+            document.getElementById('adminAuthModal').style.display = 'flex';
+            document.getElementById('adminPassInput').focus();
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminAuthModal').style.display = 'none';
+        }
+
+        function handleAdminAuth(e) {
+            e.preventDefault();
+            const inputVal = document.getElementById('adminPassInput').value;
+
+            if (inputVal === ADMIN_PASSWORD) {
+                // Grant access and redirect
+                window.location.href = "course admin.html";
+            } else {
+                document.getElementById('authErrorMsg').style.display = 'block';
+                document.getElementById('adminPassInput').value = '';
+                document.getElementById('adminPassInput').focus();
+            }
+        }
+    </script>
+</body>
+</html>

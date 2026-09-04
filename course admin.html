@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct Selling Academy - Portal</title>
+    <style>
+        :root {
+            --bg-body: #f4f6fa;
+            --sidebar-bg: #101524;
+            --sidebar-hover: #192237;
+            --primary-purple: #5856d6;
+            --primary-purple-hover: #4845c4;
+            --text-dark: #1f2937;
+            --text-muted: #8c98a9;
+            --card-bg: #ffffff;
+            --border-color: #edf2f7;
+            --success-green: #10b981;
+            --danger-red: #ef4444;
+            --warning-amber: #f59e0b;
+            --info-blue: #3b82f6;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; background-color: var(--bg-body); color: var(--text-dark); display: flex; height: 100vh; overflow: hidden; }
+
+        .sidebar { width: 250px; background-color: var(--sidebar-bg); color: #d1d5db; display: flex; flex-direction: column; height: 100vh; flex-shrink: 0; overflow-y: auto; border-right: 1px solid rgba(255,255,255,0.05); }
+        .sidebar-brand { padding: 22px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+        .sidebar-brand .logo-icon { background: linear-gradient(135deg, #f59e0b, #d97706); width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: white; }
+        .sidebar-brand-text h2 { font-size: 0.95rem; font-weight: 700; color: #ffffff; line-height: 1.2; }
+        .sidebar-brand-text span { font-size: 0.78rem; color: var(--text-muted); }
+
+        .nav-links { list-style: none; padding: 10px 12px; flex-grow: 1; }
+        .nav-links li { padding: 10px 14px; cursor: pointer; border-radius: 8px; font-size: 0.86rem; font-weight: 500; display: flex; align-items: center; gap: 12px; margin-bottom: 3px; transition: all 0.2s ease; color: #9ca3af; }
+        .nav-links li:hover { background-color: var(--sidebar-hover); color: #ffffff; }
+        .nav-links li.active { background-color: var(--primary-purple); color: #ffffff; font-weight: 600; }
+        .nav-links li .nav-icon { width: 18px; text-align: center; font-size: 0.95rem; }
+        .nav-badge { margin-left: auto; background: var(--danger-red); color: white; border-radius: 20px; font-size: 0.7rem; padding: 1px 7px; font-weight: bold; }
+
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; background-color: var(--bg-body); }
+        .top-navbar { background: #ffffff; height: 64px; padding: 0 28px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
+        .header-pill { background-color: #101524; color: #ffffff; padding: 6px 20px; border-radius: 30px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; }
+
+        .content-area { padding: 24px 28px; }
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+
+        .analytics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 22px; }
+        .stat-card { background: var(--card-bg); border-radius: 12px; padding: 18px 20px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .stat-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+        .icon-daily { background: rgba(59, 130, 246, 0.1); color: var(--info-blue); }
+        .icon-weekly { background: rgba(245, 158, 11, 0.1); color: var(--warning-amber); }
+        .icon-monthly { background: rgba(16, 185, 129, 0.1); color: var(--success-green); }
+        .icon-alltime { background: rgba(88, 86, 214, 0.1); color: var(--primary-purple); }
+        .stat-label { font-size: 0.74rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .stat-value { font-size: 1.45rem; font-weight: 700; color: var(--text-dark); line-height: 1.1; }
+
+        .panel-card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); margin-bottom: 18px; }
+        .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+        .panel-header h3 { font-size: 0.92rem; font-weight: 700; color: var(--text-dark); }
+
+        .table-responsive { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.82rem; }
+        thead { border-bottom: 1px solid var(--border-color); }
+        th { padding: 10px 12px; font-weight: 600; color: var(--text-muted); font-size: 0.74rem; text-transform: uppercase; }
+        td { padding: 12px; border-bottom: 1px solid #f8fafc; vertical-align: middle; }
+
+        .pill-badge { padding: 3px 9px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; display: inline-block; }
+        .badge-published { background: #ecfdf5; color: #059669; }
+        .badge-pending { background: #fffbeb; color: #b45309; }
+        .badge-rejected { background: #fef2f2; color: #b91c1c; }
+        .badge-rep-accepted { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+        .badge-rep-progress { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
+        .badge-rep-solved { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+        .badge-rep-review { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+
+        .btn-purple { background: var(--primary-purple); color: white; border: none; border-radius: 8px; padding: 7px 16px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+        .btn-purple:hover { background: var(--primary-purple-hover); }
+        .btn-green { background: var(--success-green); color: white; border: none; border-radius: 6px; padding: 6px 12px; font-size: 0.76rem; font-weight: 600; cursor: pointer; }
+        .btn-blue { background: var(--info-blue); color: white; border: none; border-radius: 6px; padding: 5px 10px; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
+        .btn-orange { background: var(--warning-amber); color: white; border: none; border-radius: 6px; padding: 5px 10px; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
+        .btn-danger { background: var(--danger-red); color: white; border: none; border-radius: 6px; padding: 5px 10px; font-size: 0.76rem; font-weight: 600; cursor: pointer; }
+
+        .img-preview-container { width: 100%; height: 140px; border: 2px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; display: flex; align-items: center; justify-content: center; margin-top: 8px; overflow: hidden; }
+        .img-preview-container img { width: 100%; height: 100%; object-fit: cover; }
+        .course-table-img { width: 56px; height: 38px; border-radius: 6px; object-fit: cover; border: 1px solid #e2e8f0; }
+
+        .gateway-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; align-items: start; }
+        .qr-card-preview { background: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; text-align: center; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .qr-card-preview img { width: 170px; height: 170px; object-fit: contain; border-radius: 8px; border: 1px solid #e2e8f0; padding: 6px; background: white; margin: 12px 0; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background: white; width: 100%; max-width: 620px; border-radius: 12px; overflow: hidden; max-height: 90vh; display: flex; flex-direction: column; }
+        .modal-header { background: #101524; color: white; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { padding: 20px; overflow-y: auto; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; color: var(--text-dark); }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; outline: none; }
+
+        .toast-notification { position: fixed; top: 20px; right: 20px; background: var(--success-green); color: white; padding: 14px 22px; border-radius: 8px; font-weight: 600; transform: translateX(150%); transition: transform 0.4s ease; z-index: 2000; }
+        .toast-notification.show { transform: translateX(0); }
+
+        .dynamic-item-card { display: flex; gap: 8px; align-items: center; background: #ffffff; border: 1px solid #e2e8f0; padding: 8px; border-radius: 6px; margin-bottom: 8px; }
+        .dynamic-item-card select { width: 120px; flex-shrink: 0; font-size: 0.78rem; padding: 6px; }
+        .dynamic-item-card input[type="text"] { flex-grow: 1; font-size: 0.78rem; padding: 6px 8px; }
+        .dynamic-item-card input[type="url"] { flex-grow: 2; font-size: 0.78rem; padding: 6px 8px; }
+        .remove-link-btn { background: #fee2e2; color: #ef4444; border: none; border-radius: 4px; cursor: pointer; padding: 6px 9px; font-weight: bold; font-size: 0.8rem; }
+        .remove-link-btn:hover { background: #fecaca; }
+
+        .reply-callout { background: #f0fdf4; border-left: 3px solid var(--success-green); padding: 6px 8px; margin-top: 5px; border-radius: 4px; font-size: 0.75rem; color: #166534; }
+        .ticket-item-card { background: #ffffff; border: 1px solid var(--border-color); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+    </style>
+</head>
+<body onclick="window.allowAudio && window.allowAudio()">
+
+    <audio id="order-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+    <div id="toast" class="toast-notification">🔔 Notification Alert</div>
+
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="logo-icon">🎓</div>
+            <div class="sidebar-brand-text">
+                <h2>Direct Selling</h2>
+                <span>Academy</span>
+            </div>
+        </div>
+
+        <ul class="nav-links" id="sidebar-menu">
+            <li class="active" onclick="switchView('dashboard', this)"><span class="nav-icon">📊</span> Dashboard Analytics</li>
+            <li onclick="switchView('courses', this)"><span class="nav-icon">📚</span> Course Management</li>
+            <li onclick="switchView('payments', this)"><span class="nav-icon">💳</span> Payments Queue <span id="pending-badge" class="nav-badge" style="display:none;">0</span></li>
+            <li onclick="switchView('orders', this)"><span class="nav-icon">📦</span> Orders Register</li>
+            <li onclick="switchView('reports', this)"><span class="nav-icon">🎧</span> Customer Reports <span id="report-pending-badge" class="nav-badge" style="display:none; background:#3b82f6;">0</span></li>
+            <li onclick="switchView('settings', this)"><span class="nav-icon">⚙️</span> Payment Gateway Setup</li>
+            <li onclick="switchView('userportal', this)" style="border-top: 1px solid rgba(255,255,255,0.08); margin-top: 10px; padding-top: 12px;"><span class="nav-icon">👤</span> Student Desk (Live User View)</li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-navbar">
+            <div class="header-pill">ADMIN COMMAND DASHBOARD</div>
+            <span style="font-size:0.85rem; color:#10b981; font-weight:bold;">● Firebase Cloud Live</span>
+        </header>
+
+        <div class="content-area">
+            <!-- DASHBOARD VIEW -->
+            <section id="view-dashboard" class="view-section active">
+                <div class="analytics-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon icon-daily">📅</div>
+                        <div class="stat-info">
+                            <div class="stat-label">Daily Sales (Today)</div>
+                            <div class="stat-value" id="stat-daily-sales">₹0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-weekly">📈</div>
+                        <div class="stat-info">
+                            <div class="stat-label">Weekly Sales (7 Days)</div>
+                            <div class="stat-value" id="stat-weekly-sales">₹0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-monthly">🗓️</div>
+                        <div class="stat-info">
+                            <div class="stat-label">Monthly Sales (30 Days)</div>
+                            <div class="stat-value" id="stat-monthly-sales">₹0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-alltime">💰</div>
+                        <div class="stat-info">
+                            <div class="stat-label">Total Revenue</div>
+                            <div class="stat-value" id="stat-total-sales">₹0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-card">
+                    <div class="panel-header"><h3>Recent Orders</h3></div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr><th>Time</th><th>User</th><th>Course</th><th>Amount</th><th>Status</th></tr></thead>
+                            <tbody id="dash-feed-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- COURSES VIEW -->
+            <section id="view-courses" class="view-section">
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <h3>Course & Package Directory</h3>
+                        <button class="btn-purple" onclick="window.openCourseModal()">+ Add Course / Package</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr><th>Cover</th><th>Title</th><th>Price</th><th>Materials & Items</th><th>Actions</th></tr></thead>
+                            <tbody id="admin-courses-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAYMENTS VIEW -->
+            <section id="view-payments" class="view-section">
+                <div class="panel-card">
+                    <div class="panel-header"><h3>Payment Verification Queue</h3></div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr><th>Time</th><th>Customer</th><th>Mobile</th><th>Course</th><th>Amount</th><th>UTR</th><th>Proof</th><th>Action</th></tr></thead>
+                            <tbody id="admin-payments-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ORDERS VIEW -->
+            <section id="view-orders" class="view-section">
+                <div class="panel-card">
+                    <div class="panel-header"><h3>Orders & Access Keys</h3></div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr><th>Order ID</th><th>Customer</th><th>Mobile</th><th>Course</th><th>Key</th><th>Status</th></tr></thead>
+                            <tbody id="admin-orders-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CUSTOMER REPORTS -->
+            <section id="view-reports" class="view-section">
+                <div class="panel-card">
+                    <div class="panel-header"><h3>Customer Reports & Support Queue</h3></div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead><tr><th>Ticket ID</th><th>Date</th><th>Student</th><th>Mobile</th><th>Category</th><th>Query & Admin Reply</th><th>Status</th><th>Respond</th></tr></thead>
+                            <tbody id="admin-reports-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAYMENT GATEWAY SETUP -->
+            <section id="view-settings" class="view-section">
+                <div class="panel-card">
+                    <div class="panel-header"><h3>Payment Gateway & Checkout Credentials</h3></div>
+                    <div class="gateway-layout">
+                        <form onsubmit="window.saveGatewaySettings(event)">
+                            <div class="form-group">
+                                <label>Admin Receiving UPI ID</label>
+                                <input type="text" id="adminUpi" required placeholder="e.g. yourname@okaxis" oninput="window.updateUpiPreview(this.value)">
+                            </div>
+                            <div class="form-group" style="margin-top:16px;">
+                                <label>Custom QR Code Image (Optional)</label>
+                                <input type="file" id="adminQrFileInput" accept="image/*" onchange="window.previewAdminLocalQr(event)">
+                            </div>
+                            <div style="margin: 16px 0; display:flex; gap:10px; align-items:center;">
+                                <button type="button" class="btn-blue" onclick="window.autoGenerateQrFromUpi()">⚡ Auto-Generate QR from UPI</button>
+                            </div>
+                            <button type="submit" id="saveGatewayBtn" class="btn-purple" style="width:100%; padding:10px; margin-top:10px;">💾 Save & Publish Payment Credentials</button>
+                        </form>
+
+                        <div class="qr-card-preview">
+                            <span style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Student Checkout Preview</span>
+                            <img id="gatewayQrPreview" src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=directselling@okaxis" alt="QR Preview">
+                            <p style="font-size:0.88rem; font-weight:bold; color:var(--primary-purple); margin-top:4px;" id="gatewayUpiPreview">directselling@okaxis</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STUDENT LIVE PORTAL DESK VIEW -->
+            <section id="view-userportal" class="view-section">
+                <div class="panel-card" style="background:#ffffff; border-left: 4px solid var(--primary-purple);">
+                    <div class="panel-header">
+                        <div>
+                            <h3>Student Support Portal (Live User Perspective)</h3>
+                            <p style="font-size:0.75rem; color:#64748b; margin-top:2px;">Displays submitted tickets and live official admin responses.</p>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <label style="font-size:0.75rem; font-weight:600; color:#64748b;">Filter by Mobile:</label>
+                            <input type="text" id="userDeskMobileFilter" placeholder="Enter mobile or leave empty for all" style="padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.78rem;" oninput="window.filterUserDesk(this.value)">
+                        </div>
+                    </div>
+                    
+                    <div id="user-portal-tickets-container" style="margin-top: 14px;">
+                        <!-- Real-time rendered student tickets with replies appear here -->
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- COURSE CREATION / EDIT MODAL -->
+    <div class="modal-overlay" id="course-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="courseModalTitle">Add / Edit Course Package</span>
+                <span style="cursor:pointer; font-size:1.2rem;" onclick="closeModal('course-modal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="window.handleCourseSave(event)">
+                    <input type="hidden" id="editCourseId">
+                    <div class="form-group"><label>Course Title</label><input type="text" id="cTitle" required></div>
+                    <div class="form-group"><label>Package Type</label><select id="cType"><option value="Course">Course</option><option value="Bundle">Bundle Package</option></select></div>
+                    <div class="form-group"><label>Package Price (₹)</label><input type="number" id="cPrice" required></div>
+                    
+                    <div class="form-group">
+                        <label>🖼️ Cover Image File</label>
+                        <input type="file" id="cCoverImg" accept="image/*" onchange="window.previewCoverImage(event)">
+                        <div class="img-preview-container">
+                            <img id="cCoverPreview" src="" style="display:none;">
+                            <span id="cCoverPlaceholder" style="color:#94a3b8; font-size:0.8rem;">Cover preview</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group"><label>Description</label><textarea id="cDesc" rows="2" required></textarea></div>
+                    
+                    <div class="form-group" style="background:#f8fafc; border:1px solid #e2e8f0; padding:14px; border-radius:8px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <label style="color:var(--primary-purple); font-weight:700; margin:0;">🔗 Course Links & Materials (Drive / YouTube / Video)</label>
+                            <button type="button" class="btn-blue" style="font-size:0.75rem; padding:4px 8px;" onclick="window.addDynamicLinkField()">+ Add Item / Link</button>
+                        </div>
+                        <div id="dynamic-links-container"></div>
+                    </div>
+
+                    <button type="submit" class="btn-purple" id="cSubmitBtn" style="width:100%; margin-top:8px;">Publish Package</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOMER REPORT REPLY MODAL -->
+    <div class="modal-overlay" id="reply-modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <span>💬 Reply to Student Query</span>
+                <span style="cursor:pointer; font-size:1.2rem;" onclick="closeModal('reply-modal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="window.saveReportReply(event)">
+                    <input type="hidden" id="replyReportId">
+                    
+                    <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:14px;">
+                        <p style="font-size:0.8rem; color:#64748b; margin-bottom:4px;"><strong>Student:</strong> <span id="replyModalStudent">-</span> (<span id="replyModalMobile">-</span>)</p>
+                        <p style="font-size:0.8rem; color:#64748b; margin-bottom:6px;"><strong>Category:</strong> <span id="replyModalCategory">-</span></p>
+                        <p style="font-size:0.82rem; color:var(--text-dark); background:white; padding:8px; border-radius:6px; border:1px solid #edf2f7;" id="replyModalDesc">-</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Update Ticket Status</label>
+                        <select id="replyModalStatus">
+                            <option value="Under Review">Under Review</option>
+                            <option value="Accepted">Accepted</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Solved">Solved</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Official Resolution / Reply Message (Visible to User)</label>
+                        <textarea id="replyModalText" rows="4" required placeholder="Write your response, resolution instructions, or meeting links for the user here..."></textarea>
+                    </div>
+
+                    <button type="submit" id="replyModalBtn" class="btn-purple" style="width:100%;">Send Reply to Student</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- REJECT MODAL -->
+    <div class="modal-overlay" id="reject-modal">
+        <div class="modal-content" style="max-width: 420px;">
+            <div class="modal-header"><span>Reject Payment</span><span style="cursor:pointer;" onclick="closeModal('reject-modal')">&times;</span></div>
+            <div class="modal-body">
+                <form onsubmit="window.confirmRejection(event)">
+                    <input type="hidden" id="rejectId">
+                    <div class="form-group"><label>Reason</label><textarea id="rejectReason" rows="3" required placeholder="Specify why the order is rejected..."></textarea></div>
+                    <button type="submit" class="btn-danger" style="width:100%;">Confirm Reject</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROOF MODAL -->
+    <div class="modal-overlay" id="proof-modal" onclick="closeModal('proof-modal')">
+        <img id="proof-full-img" style="max-width:90%; max-height:85vh; border-radius:8px;">
+    </div>
+
+    <!-- FIREBASE MODULE SCRIPT -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-analytics.js";
+        import { 
+            getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, setDoc, onSnapshot, query, orderBy 
+        } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDCJ_MTQAm1srivoNKZz42Qp9s5fxjW7SY",
+            authDomain: "direct-selling-academy.firebaseapp.com",
+            projectId: "direct-selling-academy",
+            storageBucket: "direct-selling-academy.firebasestorage.app",
+            messagingSenderId: "140221942316",
+            appId: "1:140221942316:web:876cd633655328be521f89",
+            measurementId: "G-CQ8JTJTHNZ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+
+        let audioAllowed = false;
+        let lastOrdersCount = 0;
+        let lastReportsCount = 0;
+        let stagedCoverDataUrl = null;
+        let stagedQrCodeDataUrl = null;
+        let activeCoursesCache = []; 
+        let activeReportsCache = [];
+
+        window.allowAudio = () => { audioAllowed = true; };
+
+        function playOrderSound() {
+            if (audioAllowed) {
+                const snd = document.getElementById('order-sound');
+                snd.currentTime = 0;
+                snd.play().catch(e => console.log(e));
+            }
+        }
+
+        function showNotification(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve) => {
+                if (!file) return resolve(null);
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => resolve(null);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        window.previewCoverImage = async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                stagedCoverDataUrl = await fileToBase64(file);
+                const preview = document.getElementById('cCoverPreview');
+                const placeholder = document.getElementById('cCoverPlaceholder');
+                preview.src = stagedCoverDataUrl;
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+            }
+        };
+
+        window.addDynamicLinkField = (type = 'Video', title = '', url = '') => {
+            const container = document.getElementById('dynamic-links-container');
+            const row = document.createElement('div');
+            row.className = 'dynamic-item-card';
+            row.innerHTML = `
+                <select class="item-type">
+                    <option value="Video" ${type === 'Video' ? 'selected' : ''}>🎥 Video</option>
+                    <option value="PDF" ${type === 'PDF' ? 'selected' : ''}>📝 PDF / Notes</option>
+                    <option value="PPT" ${type === 'PPT' ? 'selected' : ''}>📊 PPT Slide</option>
+                    <option value="Link" ${type === 'Link' ? 'selected' : ''}>🔗 Resource Link</option>
+                </select>
+                <input type="text" class="item-title" placeholder="Item Name (e.g. Chapter 1)" value="${title}">
+                <input type="url" class="item-url" placeholder="https://..." value="${url}" required>
+                <button type="button" class="remove-link-btn" title="Remove" onclick="this.parentElement.remove()">✕</button>
+            `;
+            container.appendChild(row);
+        };
+
+        function getDynamicLinksData() {
+            const rows = document.querySelectorAll('#dynamic-links-container .dynamic-item-card');
+            const items = [];
+            rows.forEach(r => {
+                const type = r.querySelector('.item-type').value;
+                const title = r.querySelector('.item-title').value.trim();
+                const url = r.querySelector('.item-url').value.trim();
+                if (url) {
+                    items.push({ type, title: title || `${type} Link`, url });
+                }
+            });
+            return items;
+        }
+
+        window.updateUpiPreview = (val) => {
+            const upi = val.trim() || 'directselling@okaxis';
+            document.getElementById('gatewayUpiPreview').innerText = upi;
+            if (!stagedQrCodeDataUrl) {
+                document.getElementById('gatewayQrPreview').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=${encodeURIComponent(upi)}`;
+            }
+        };
+
+        window.previewAdminLocalQr = async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                stagedQrCodeDataUrl = await fileToBase64(file);
+                document.getElementById('gatewayQrPreview').src = stagedQrCodeDataUrl;
+                showNotification("Custom QR Code loaded into preview!");
+            }
+        };
+
+        window.autoGenerateQrFromUpi = () => {
+            const upi = document.getElementById('adminUpi').value.trim();
+            if (!upi) {
+                alert("Please enter a valid UPI ID first.");
+                return;
+            }
+            stagedQrCodeDataUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=${encodeURIComponent(upi)}`;
+            document.getElementById('gatewayQrPreview').src = stagedQrCodeDataUrl;
+            document.getElementById('adminQrFileInput').value = '';
+            showNotification("Instant QR Code generated for: " + upi);
+        };
+
+        window.saveGatewaySettings = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('saveGatewayBtn');
+            btn.disabled = true;
+            btn.innerText = "Saving to Cloud...";
+
+            try {
+                const upiVal = document.getElementById('adminUpi').value.trim();
+                const currentQrSrc = document.getElementById('gatewayQrPreview').src;
+
+                await setDoc(doc(db, "settings", "gateway"), {
+                    upiId: upiVal,
+                    qrCodeUrl: stagedQrCodeDataUrl || currentQrSrc,
+                    updatedAt: Date.now()
+                });
+
+                showNotification("Payment Gateway & QR Code published live!");
+            } catch (err) {
+                console.error("Gateway Save Error:", err);
+                alert("Failed to save gateway settings: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "💾 Save & Publish Payment Credentials";
+            }
+        };
+
+        // --- 1. ORDERS REAL-TIME LISTENER ---
+        const ordersQuery = query(collection(db, "orders"), orderBy("timestamp", "desc"));
+        onSnapshot(ordersQuery, (snapshot) => {
+            const orders = [];
+            snapshot.forEach(docSnap => orders.push({ id: docSnap.id, ...docSnap.data() }));
+
+            if (orders.length > lastOrdersCount && lastOrdersCount !== 0) {
+                playOrderSound();
+                showNotification(`🔔 New Payment Order from ${orders[0].name}!`);
+            }
+            lastOrdersCount = orders.length;
+
+            renderAdminOrdersAndPayments(orders);
+            computeAnalytics(orders);
+        });
+
+        // --- 2. COURSES REAL-TIME LISTENER ---
+        onSnapshot(collection(db, "courses"), (snapshot) => {
+            activeCoursesCache = [];
+            snapshot.forEach(docSnap => activeCoursesCache.push({ id: docSnap.id, ...docSnap.data() }));
+            renderCoursesTable(activeCoursesCache);
+        });
+
+        // --- 3. REPORTS REAL-TIME LISTENER ---
+        onSnapshot(collection(db, "reports"), (snapshot) => {
+            activeReportsCache = [];
+            snapshot.forEach(docSnap => activeReportsCache.push({ id: docSnap.id, ...docSnap.data() }));
+
+            if (activeReportsCache.length > lastReportsCount && lastReportsCount !== 0) {
+                playOrderSound();
+                showNotification(`🎧 New Customer Query Submitted!`);
+            }
+            lastReportsCount = activeReportsCache.length;
+
+            renderReportsQueue(activeReportsCache);
+            renderUserPortalTickets();
+        });
+
+        // --- 4. GATEWAY SETTINGS REAL-TIME LISTENER ---
+        onSnapshot(doc(db, "settings", "gateway"), (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                const upi = data.upiId || 'directselling@okaxis';
+                document.getElementById('adminUpi').value = upi;
+                document.getElementById('gatewayUpiPreview').innerText = upi;
+                
+                if (data.qrCodeUrl) {
+                    document.getElementById('gatewayQrPreview').src = data.qrCodeUrl;
+                    stagedQrCodeDataUrl = data.qrCodeUrl;
+                } else {
+                    document.getElementById('gatewayQrPreview').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=${encodeURIComponent(upi)}`;
+                }
+            }
+        });
+
+        function computeAnalytics(orders) {
+            const now = Date.now();
+            const oneDay = 24 * 60 * 60 * 1000;
+            const sevenDays = 7 * oneDay;
+            const thirtyDays = 30 * oneDay;
+
+            let daily = 0, weekly = 0, monthly = 0, total = 0;
+
+            orders.forEach(o => {
+                if (o.status === 'approved') {
+                    const amt = Number(o.price || 0);
+                    const age = now - (o.timestamp || now);
+                    total += amt;
+                    if (age <= oneDay) daily += amt;
+                    if (age <= sevenDays) weekly += amt;
+                    if (age <= thirtyDays) monthly += amt;
+                }
+            });
+
+            document.getElementById('stat-daily-sales').innerText = '₹' + daily.toLocaleString('en-IN');
+            document.getElementById('stat-weekly-sales').innerText = '₹' + weekly.toLocaleString('en-IN');
+            document.getElementById('stat-monthly-sales').innerText = '₹' + monthly.toLocaleString('en-IN');
+            document.getElementById('stat-total-sales').innerText = '₹' + total.toLocaleString('en-IN');
+        }
+
+        function renderAdminOrdersAndPayments(orders) {
+            const paymentsTb = document.getElementById('admin-payments-tbody');
+            const ordersTb = document.getElementById('admin-orders-tbody');
+            const feedTb = document.getElementById('dash-feed-tbody');
+            paymentsTb.innerHTML = ''; ordersTb.innerHTML = ''; feedTb.innerHTML = '';
+
+            let pendingCount = 0;
+
+            orders.forEach(o => {
+                if (o.status === 'pending') pendingCount++;
+
+                let action = '';
+                if (o.status === 'pending') {
+                    action = `<button class="btn-green" onclick="window.approveOrderPrompt('${o.id}', '${o.mobile}')">Approve</button> <button class="btn-danger" onclick="window.promptRejectModal('${o.id}')">Reject</button>`;
+                } else if (o.status === 'approved') {
+                    action = `<span class="pill-badge badge-published">Approved</span> <code style="font-weight:bold;">${o.accessKey}</code>`;
+                } else {
+                    action = `<span class="pill-badge badge-rejected">Rejected</span>`;
+                }
+
+                paymentsTb.innerHTML += `
+                    <tr>
+                        <td>${new Date(o.timestamp).toLocaleTimeString()}</td>
+                        <td><strong>${o.name}</strong></td>
+                        <td>${o.mobile}</td>
+                        <td>${o.courseTitle}</td>
+                        <td>₹${o.price}</td>
+                        <td><code>${o.utr}</code></td>
+                        <td><img src="${o.screenshot}" style="width:34px; height:34px; border-radius:4px; cursor:pointer;" onclick="window.viewProof('${o.screenshot}')"></td>
+                        <td>${action}</td>
+                    </tr>
+                `;
+
+                ordersTb.innerHTML += `
+                    <tr>
+                        <td>#${String(o.id).slice(-4)}</td>
+                        <td>${o.name}</td>
+                        <td>${o.mobile}</td>
+                        <td>${o.courseTitle}</td>
+                        <td><code>${o.accessKey || 'Pending'}</code></td>
+                        <td><span class="pill-badge ${o.status==='approved'?'badge-published':(o.status==='pending'?'badge-pending':'badge-rejected')}">${o.status}</span></td>
+                    </tr>
+                `;
+            });
+
+            orders.filter(o => o.status === 'approved').slice(0, 5).forEach(o => {
+                feedTb.innerHTML += `
+                    <tr>
+                        <td>${new Date(o.timestamp).toLocaleTimeString()}</td>
+                        <td><strong>${o.name}</strong></td>
+                        <td>${o.courseTitle}</td>
+                        <td><strong style="color:var(--success-green);">₹${o.price}</strong></td>
+                        <td><span class="pill-badge badge-published">Completed</span></td>
+                    </tr>
+                `;
+            });
+
+            const pBadge = document.getElementById('pending-badge');
+            if (pendingCount > 0) {
+                pBadge.style.display = 'inline-block';
+                pBadge.innerText = pendingCount;
+            } else {
+                pBadge.style.display = 'none';
+            }
+        }
+
+        function renderCoursesTable(courses) {
+            const coursesTb = document.getElementById('admin-courses-tbody');
+            coursesTb.innerHTML = '';
+            courses.forEach(c => {
+                let badgeList = [];
+
+                if (Array.isArray(c.items) && c.items.length > 0) {
+                    c.items.forEach(item => {
+                        const icon = item.type === 'Video' ? '🎥' : item.type === 'PDF' ? '📝' : item.type === 'PPT' ? '📊' : '🔗';
+                        badgeList.push(`<a href="${item.url}" target="_blank" style="text-decoration:none; margin-right:4px;" title="${item.url}"><span class="pill-badge badge-rep-accepted">${icon} ${item.title || item.type}</span></a>`);
+                    });
+                } else {
+                    if (c.extLink) badgeList.push(`<a href="${c.extLink}" target="_blank" style="text-decoration:none;"><span class="pill-badge badge-rep-accepted">🎥 Online Link</span></a>`);
+                    if (c.videoUrl) badgeList.push(`<span class="pill-badge badge-published">🎥 Video</span>`);
+                    if (c.pdfUrl) badgeList.push(`<span class="pill-badge badge-published">📝 PDF</span>`);
+                    if (c.pptUrl) badgeList.push(`<span class="pill-badge badge-published">📊 PPT</span>`);
+                }
+
+                const imagePreview = (c.imgUrl || c.img)
+                    ? `<img src="${c.imgUrl || c.img}" class="course-table-img">`
+                    : `<div style="width:56px; height:38px; border-radius:6px; background:#e2e8f0; display:flex; align-items:center; justify-content:center; font-size:1.1rem;">📦</div>`;
+
+                coursesTb.innerHTML += `
+                    <tr>
+                        <td>${imagePreview}</td>
+                        <td><strong>${c.title}</strong><br><span style="font-size:0.75rem; color:#64748b;">${c.type || 'Course'}</span></td>
+                        <td>₹${c.price}</td>
+                        <td style="max-width:280px; line-height:1.6;">${badgeList.length ? badgeList.join(' ') : '<span style="color:#94a3b8;">No items</span>'}</td>
+                        <td>
+                            <div style="display:flex; gap:6px;">
+                                <button class="btn-blue" style="padding:4px 8px; font-size:0.72rem;" onclick="window.openEditCourseModal('${c.id}')">✏️ Edit</button>
+                                <button class="btn-danger" style="padding:4px 8px; font-size:0.72rem;" onclick="window.deleteCourse('${c.id}')">🗑️ Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // --- ADMIN SUPPORT VIEW TABLE ---
+        function renderReportsQueue(reports) {
+            const tb = document.getElementById('admin-reports-tbody');
+            tb.innerHTML = '';
+            let pendingReports = 0;
+
+            reports.slice().reverse().forEach(r => {
+                if (r.status === 'Under Review') pendingReports++;
+
+                let badgeClass = 'badge-rep-review';
+                if (r.status === 'Accepted') badgeClass = 'badge-rep-accepted';
+                else if (r.status === 'In Progress') badgeClass = 'badge-rep-progress';
+                else if (r.status === 'Solved') badgeClass = 'badge-rep-solved';
+
+                const replyDisplay = (r.adminReply || r.reply)
+                    ? `<div class="reply-callout"><strong>Reply:</strong> ${r.adminReply || r.reply}</div>`
+                    : `<div style="font-size:0.72rem; color:#94a3b8; margin-top:4px;">No reply sent yet</div>`;
+
+                tb.innerHTML += `
+                    <tr>
+                        <td>#${String(r.id).slice(-4)}</td>
+                        <td>${r.date || new Date().toLocaleDateString()}</td>
+                        <td><strong>${r.user || 'Student'}</strong></td>
+                        <td>${r.mobile || 'N/A'}</td>
+                        <td><span class="pill-badge badge-published">${r.category || r.subject || 'Support'}</span></td>
+                        <td style="max-width:260px; white-space:normal;">
+                            <div style="font-weight:500;">${r.desc}</div>
+                            ${replyDisplay}
+                        </td>
+                        <td><span class="pill-badge ${badgeClass}">${r.status}</span></td>
+                        <td>
+                            <button class="btn-purple" style="padding:5px 12px; font-size:0.75rem;" onclick="window.openReplyModal('${r.id}')">💬 Reply</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            const rBadge = document.getElementById('report-pending-badge');
+            if (pendingReports > 0) {
+                rBadge.style.display = 'inline-block';
+                rBadge.innerText = pendingReports;
+            } else {
+                rBadge.style.display = 'none';
+            }
+        }
+
+        // --- USER / STUDENT PORTAL DESK RENDERER (DISPLAYS ADMIN REPLY TO USERS) ---
+        function renderUserPortalTickets(mobileFilter = "") {
+            const container = document.getElementById('user-portal-tickets-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            let filtered = activeReportsCache.slice().reverse();
+            if (mobileFilter.trim()) {
+                filtered = filtered.filter(r => String(r.mobile || "").includes(mobileFilter.trim()));
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:30px; color:#94a3b8; font-size:0.85rem;">
+                        No tickets found for this query.
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(ticket => {
+                let badgeClass = 'badge-rep-review';
+                if (ticket.status === 'Accepted') badgeClass = 'badge-rep-accepted';
+                else if (ticket.status === 'In Progress') badgeClass = 'badge-rep-progress';
+                else if (ticket.status === 'Solved') badgeClass = 'badge-rep-solved';
+
+                const effectiveReply = ticket.adminReply || ticket.reply || null;
+
+                const replyBlock = effectiveReply
+                    ? `
+                        <div style="margin-top:12px; padding:12px 14px; background:#f0fdf4; border-left:4px solid #10b981; border-radius:6px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                <strong style="color:#047857; font-size:0.8rem;">🎓 Academy Resolution / Admin Reply:</strong>
+                                <span style="font-size:0.7rem; color:#065f46;">${ticket.replyTimestamp ? new Date(ticket.replyTimestamp).toLocaleString() : ''}</span>
+                            </div>
+                            <p style="margin:0; font-size:0.82rem; color:#064e3b; line-height:1.4; white-space:pre-wrap;">${effectiveReply}</p>
+                        </div>
+                    `
+                    : `
+                        <div style="margin-top:10px; padding:8px 12px; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:6px; font-size:0.76rem; color:#94a3b8;">
+                            ⏳ Your ticket is in queue. The academy team will inspect and post the answer right here.
+                        </div>
+                    `;
+
+                container.innerHTML += `
+                    <div class="ticket-item-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <div>
+                                <span style="font-size:0.88rem; font-weight:700; color:var(--text-dark);">Ticket #${String(ticket.id).slice(-4)}</span>
+                                <span style="font-size:0.75rem; color:#64748b; margin-left:8px;">${ticket.category || ticket.subject || 'Support'}</span>
+                            </div>
+                            <span class="pill-badge ${badgeClass}">${ticket.status || 'Under Review'}</span>
+                        </div>
+
+                        <div style="font-size:0.8rem; color:#475569; margin-bottom:6px;">
+                            <strong>Student:</strong> ${ticket.user || 'Student'} | <strong>Mobile:</strong> ${ticket.mobile || 'N/A'} | <strong>Date:</strong> ${ticket.date || 'Recent'}
+                        </div>
+
+                        <div style="font-size:0.83rem; color:var(--text-dark); background:#fbfcfe; border:1px solid #edf2f7; padding:10px 12px; border-radius:6px;">
+                            ${ticket.desc}
+                        </div>
+
+                        ${replyBlock}
+                    </div>
+                `;
+            });
+        }
+
+        window.filterUserDesk = (val) => {
+            renderUserPortalTickets(val);
+        };
+
+        // --- REPLY MODAL LOGIC ---
+        window.openReplyModal = (reportId) => {
+            const report = activeReportsCache.find(r => r.id === reportId);
+            if (!report) return;
+
+            document.getElementById('replyReportId').value = report.id;
+            document.getElementById('replyModalStudent').innerText = report.user || 'Student';
+            document.getElementById('replyModalMobile').innerText = report.mobile || 'N/A';
+            document.getElementById('replyModalCategory').innerText = report.category || report.subject || 'Support';
+            document.getElementById('replyModalDesc').innerText = report.desc || 'No details provided';
+            document.getElementById('replyModalStatus').value = report.status || 'Solved';
+            document.getElementById('replyModalText').value = report.adminReply || report.reply || '';
+
+            document.getElementById('reply-modal').style.display = 'flex';
+        };
+
+        window.saveReportReply = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('replyModalBtn');
+            btn.disabled = true;
+            btn.innerText = "Submitting Reply...";
+
+            const id = document.getElementById('replyReportId').value;
+            const newStatus = document.getElementById('replyModalStatus').value;
+            const replyText = document.getElementById('replyModalText').value.trim();
+
+            try {
+                // Stores both adminReply and reply keys to prevent field name mismatch
+                await updateDoc(doc(db, "reports", id), {
+                    status: newStatus,
+                    adminReply: replyText,
+                    reply: replyText,
+                    replyTimestamp: Date.now()
+                });
+
+                showNotification("Reply published! Student can now view it instantly.");
+                closeModal('reply-modal');
+            } catch (err) {
+                console.error("Reply Error:", err);
+                alert("Failed to send reply: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Send Reply to Student";
+            }
+        };
+
+        window.approveOrderPrompt = async (docId, mobile) => {
+            const generatedKey = 'KEY-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+            const confirmText = `Approve this order?\n\nAn Access Key (${generatedKey}) will be generated.\nYou MUST send this key to the user's mobile number (${mobile}) so they can unlock the course.`;
+
+            if (confirm(confirmText)) {
+                await updateDoc(doc(db, "orders", docId), {
+                    status: 'approved',
+                    accessKey: generatedKey
+                });
+                showNotification(`Order approved! Key: ${generatedKey}`);
+            }
+        };
+
+        window.promptRejectModal = (id) => {
+            document.getElementById('rejectId').value = id;
+            document.getElementById('rejectReason').value = '';
+            document.getElementById('reject-modal').style.display = 'flex';
+        };
+
+        window.confirmRejection = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('rejectId').value;
+            const reason = document.getElementById('rejectReason').value;
+
+            await updateDoc(doc(db, "orders", id), {
+                status: 'rejected',
+                rejectDesc: reason
+            });
+
+            closeModal('reject-modal');
+            showNotification(`Order marked as rejected.`);
+        };
+
+        // --- COURSE ADD & EDIT LOGIC ---
+        window.openCourseModal = () => { 
+            document.getElementById('editCourseId').value = '';
+            document.getElementById('courseModalTitle').innerText = 'Add Course Package';
+            stagedCoverDataUrl = null;
+            document.getElementById('cTitle').value = '';
+            document.getElementById('cType').value = 'Course';
+            document.getElementById('cPrice').value = '';
+            document.getElementById('cDesc').value = '';
+
+            const coverInput = document.getElementById('cCoverImg');
+            if (coverInput) coverInput.value = '';
+
+            const preview = document.getElementById('cCoverPreview');
+            const placeholder = document.getElementById('cCoverPlaceholder');
+            if (preview) { preview.src = ''; preview.style.display = 'none'; }
+            if (placeholder) { placeholder.style.display = 'block'; }
+
+            document.getElementById('dynamic-links-container').innerHTML = '';
+            window.addDynamicLinkField('Video', 'Main Class Video', '');
+
+            document.getElementById('course-modal').style.display = 'flex'; 
+        };
+
+        window.openEditCourseModal = (id) => {
+            const course = activeCoursesCache.find(c => c.id === id);
+            if (!course) return;
+
+            document.getElementById('editCourseId').value = course.id;
+            document.getElementById('courseModalTitle').innerText = 'Edit Course Package';
+            document.getElementById('cTitle').value = course.title || '';
+            document.getElementById('cType').value = course.type || 'Course';
+            document.getElementById('cPrice').value = course.price || '';
+            document.getElementById('cDesc').value = course.desc || '';
+
+            stagedCoverDataUrl = course.imgUrl || course.img || null;
+            const preview = document.getElementById('cCoverPreview');
+            const placeholder = document.getElementById('cCoverPlaceholder');
+            if (stagedCoverDataUrl) {
+                preview.src = stagedCoverDataUrl;
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+            } else {
+                preview.src = '';
+                preview.style.display = 'none';
+                placeholder.style.display = 'block';
+            }
+
+            const container = document.getElementById('dynamic-links-container');
+            container.innerHTML = '';
+            if (Array.isArray(course.items) && course.items.length > 0) {
+                course.items.forEach(item => {
+                    window.addDynamicLinkField(item.type, item.title, item.url);
+                });
+            } else if (course.extLink) {
+                window.addDynamicLinkField('Video', 'Main Video', course.extLink);
+            } else {
+                window.addDynamicLinkField('Video', '', '');
+            }
+
+            document.getElementById('course-modal').style.display = 'flex';
+        };
+
+        window.handleCourseSave = async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('cSubmitBtn');
+            submitBtn.disabled = true;
+
+            const editId = document.getElementById('editCourseId').value;
+            const coverInput = document.getElementById('cCoverImg');
+            const coverFile = coverInput && coverInput.files ? coverInput.files[0] : null;
+
+            try {
+                let imgUrl = stagedCoverDataUrl;
+
+                if (coverFile) {
+                    submitBtn.innerText = 'Processing Image...';
+                    imgUrl = await fileToBase64(coverFile);
+                }
+
+                submitBtn.innerText = 'Saving to Database...';
+
+                const items = getDynamicLinksData();
+
+                const courseData = {
+                    title: document.getElementById('cTitle').value.trim(),
+                    type: document.getElementById('cType').value,
+                    price: document.getElementById('cPrice').value,
+                    desc: document.getElementById('cDesc').value.trim(),
+                    imgUrl: imgUrl,
+                    items: items,
+                    extLink: items.length > 0 ? items[0].url : '',
+                    timestamp: Date.now()
+                };
+
+                if (editId) {
+                    await updateDoc(doc(db, "courses", editId), courseData);
+                    showNotification("Course package updated successfully!");
+                } else {
+                    await addDoc(collection(db, "courses"), courseData);
+                    showNotification("Course package published successfully!");
+                }
+
+                closeModal('course-modal');
+            } catch(err) {
+                console.error("Course save error:", err);
+                alert("Operation failed: " + err.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Publish Package';
+            }
+        };
+
+        window.deleteCourse = async (id) => {
+            if (confirm("Delete this package permanently from cloud?")) {
+                await deleteDoc(doc(db, "courses", id));
+                showNotification("Course deleted.");
+            }
+        };
+
+        window.viewProof = (src) => {
+            document.getElementById('proof-full-img').src = src;
+            document.getElementById('proof-modal').style.display = 'flex';
+        };
+
+        window.closeModal = (id) => { document.getElementById(id).style.display = 'none'; };
+        window.switchView = (viewName, el) => {
+            document.querySelectorAll('#sidebar-menu li').forEach(li => li.classList.remove('active'));
+            if (el) el.classList.add('active');
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById('view-' + viewName);
+            if (target) target.classList.add('active');
+        };
+    </script>
+</body>
+</html>
