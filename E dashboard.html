@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopEase - Portal Selector</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@450;500;600;700;800&display=swap');
+
+        :root { 
+            --bg-main: #0f1123; 
+            --card-bg: rgba(25, 29, 61, 0.75);
+            --white: #ffffff; 
+            --primary: #8b5cf6; 
+            --primary-glow: rgba(139, 92, 246, 0.4);
+            --accent-pink: #ec4899;
+            --accent-cyan: #06b6d4;
+            --text-dark: #f8fafc; 
+            --text-muted: #94a3b8; 
+            --border: rgba(255, 255, 255, 0.08); 
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        body { 
+            background-color: var(--bg-main); 
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.12) 0%, transparent 40%);
+            color: var(--text-dark); 
+            min-height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Ambient floating glowing shapes */
+        .shape {
+            position: absolute;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.5;
+            border-radius: 50%;
+        }
+        .shape-1 { width: 300px; height: 300px; background: var(--primary); top: -50px; left: -50px; animation: float 8s ease-in-out infinite; }
+        .shape-2 { width: 350px; height: 350px; background: var(--accent-pink); bottom: -60px; right: -60px; animation: float 10s ease-in-out infinite reverse; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-20px) scale(1.05); }
+        }
+
+        .selector-container { text-align: center; max-width: 900px; width: 100%; padding: 30px; z-index: 1; }
+        
+        .brand-header { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 12px; }
+        .brand-icon { 
+            background: linear-gradient(135deg, var(--primary), var(--accent-pink)); 
+            color: white; 
+            width: 52px; 
+            height: 52px; 
+            border-radius: 16px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 24px;
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
+        }
+        .brand-header h1 { 
+            font-size: 34px; 
+            font-weight: 800; 
+            letter-spacing: -0.5px; 
+            background: linear-gradient(to right, #fff, #cbd5e1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle { color: var(--text-muted); font-size: 16px; margin-bottom: 50px; font-weight: 500; }
+
+        .portal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 30px; }
+        
+        .portal-card { 
+            background: var(--card-bg); 
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border); 
+            border-radius: 24px; 
+            padding: 45px 35px; 
+            text-align: center; 
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            cursor: pointer; 
+            position: relative; 
+            overflow: hidden; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .portal-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .portal-card:hover { 
+            transform: translateY(-8px); 
+            box-shadow: 0 20px 50px rgba(139, 92, 246, 0.2); 
+            border-color: rgba(139, 92, 246, 0.4); 
+        }
+
+        .portal-card:hover::before { opacity: 1; }
+        
+        .portal-icon { 
+            width: 80px; 
+            height: 80px; 
+            border-radius: 20px; 
+            background: rgba(139, 92, 246, 0.12); 
+            color: var(--primary); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 32px; 
+            margin-bottom: 26px; 
+            transition: all 0.4s ease; 
+        }
+
+        .portal-card.admin-card .portal-icon {
+            background: rgba(236, 72, 153, 0.12);
+            color: var(--accent-pink);
+        }
+
+        .portal-card:hover .portal-icon { 
+            background: var(--primary); 
+            color: white; 
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 10px 20px var(--primary-glow);
+        }
+
+        .portal-card.admin-card:hover .portal-icon {
+            background: var(--accent-pink);
+            box-shadow: 0 10px 20px rgba(236, 72, 153, 0.4);
+        }
+
+        .portal-title { font-size: 20px; font-weight: 700; margin-bottom: 12px; color: #fff; }
+        .portal-desc { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 30px; }
+        
+        .portal-btn { 
+            background: rgba(255, 255, 255, 0.05); 
+            color: var(--text-dark); 
+            border: 1px solid var(--border); 
+            padding: 14px 28px; 
+            border-radius: 14px; 
+            font-size: 14px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            width: 100%; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .portal-card:hover .portal-btn { 
+            background: linear-gradient(135deg, var(--primary), #7c3aed); 
+            color: white; 
+            border-color: transparent;
+            box-shadow: 0 8px 20px var(--primary-glow);
+        }
+
+        .portal-card.admin-card:hover .portal-btn {
+            background: linear-gradient(135deg, var(--accent-pink), #db2777);
+            box-shadow: 0 8px 20px rgba(236, 72, 153, 0.4);
+        }
+
+        /* Admin Password Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 17, 35, 0.8); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .modal-content { 
+            background: #1a1e38; 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            padding: 36px; 
+            border-radius: 24px; 
+            width: 100%; 
+            max-width: 420px; 
+            position: relative; 
+            text-align: left; 
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5); 
+            animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes scaleUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .close-modal { position: absolute; top: 24px; right: 24px; cursor: pointer; font-size: 18px; color: var(--text-muted); transition: 0.2s; }
+        .close-modal:hover { color: #fff; }
+        
+        .form-group { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
+        .form-group label { font-size: 13px; font-weight: 600; color: #cbd5e1; }
+        .form-group input { 
+            padding: 14px 16px; 
+            border-radius: 12px; 
+            border: 1px solid var(--border); 
+            font-size: 14px; 
+            outline: none; 
+            background: #0f1123; 
+            color: #fff;
+            transition: 0.3s; 
+        }
+        .form-group input:focus { border-color: var(--accent-pink); box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2); }
+        
+        .btn-primary { 
+            background: linear-gradient(135deg, var(--accent-pink), #db2777); 
+            color: white; 
+            border: none; 
+            padding: 14px; 
+            width: 100%; 
+            border-radius: 12px; 
+            font-size: 14px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+            box-shadow: 0 8px 20px rgba(236, 72, 153, 0.3);
+        }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); }
+        
+        .error-msg { color: #f43f5e; font-size: 12.5px; margin-top: -10px; margin-bottom: 16px; display: none; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient background shapes -->
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+
+    <div class="selector-container">
+        <div class="brand-header">
+            <div class="brand-icon"><i class="fas fa-shopping-bag"></i></div>
+            <h1>ShopEase</h1>
+        </div>
+        <p class="subtitle">Choose your secure access portal to get started</p>
+
+        <div class="portal-grid">
+            <!-- Customer Portal Card -->
+            <div class="portal-card" onclick="openCustomerPortal()">
+                <div class="portal-icon"><i class="fas fa-store"></i></div>
+                <h3 class="portal-title">Customer Storefront</h3>
+                <p class="portal-desc">Explore rich collections, manage your cart effortlessly, place orders securely, and track shipments live.</p>
+                <button class="portal-btn">Enter Storefront <i class="fas fa-arrow-right"></i></button>
+            </div>
+
+            <!-- Admin Portal Card -->
+            <div class="portal-card admin-card" onclick="openAdminModal()">
+                <div class="portal-icon"><i class="fas fa-user-shield"></i></div>
+                <h3 class="portal-title">Admin Management Panel</h3>
+                <p class="portal-desc">Control inventory levels, review order status updates, configure secure gateways, and manage coupons.</p>
+                <button class="portal-btn">Admin Portal Login <i class="fas fa-lock"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Password Verification Modal -->
+    <div class="modal-overlay" id="adminAuthModal">
+        <div class="modal-content">
+            <i class="fas fa-times close-modal" onclick="closeAdminModal()"></i>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+                <div style="background: rgba(236, 72, 153, 0.15); color: var(--accent-pink); width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px;"><i class="fas fa-lock"></i></div>
+                <div>
+                    <h2 style="font-size: 18px; font-weight: 700; color: #fff;">Admin Authentication</h2>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Enter credentials to unlock management controls.</p>
+                </div>
+            </div>
+            <form onsubmit="verifyAdminPassword(event)">
+                <div class="form-group">
+                    <label>Security Password</label>
+                    <input type="password" id="adminPasswordInput" placeholder="Enter security password" required autocomplete="current-password">
+                </div>
+                <div class="error-msg" id="adminErrorMsg"><i class="fas fa-exclamation-circle" style="margin-right: 4px;"></i> Incorrect password. Please try again.</div>
+                <button type="submit" class="btn-primary">Unlock Panel <i class="fas fa-arrow-right" style="margin-left: 4px;"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_SECURE_PASSWORD = "123";
+
+        function openCustomerPortal() {
+            window.location.href = "usere.html";
+        }
+
+        function openAdminModal() {
+            document.getElementById('adminAuthModal').classList.add('active');
+            document.getElementById('adminPasswordInput').focus();
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminAuthModal').classList.remove('active');
+            document.getElementById('adminPasswordInput').value = '';
+            document.getElementById('adminErrorMsg').style.display = 'none';
+        }
+
+        function verifyAdminPassword(e) {
+            e.preventDefault();
+            const password = document.getElementById('adminPasswordInput').value;
+            const errorMsg = document.getElementById('adminErrorMsg');
+
+            if (password === ADMIN_SECURE_PASSWORD) {
+                sessionStorage.setItem('isAdminAuthenticated', 'true');
+                window.location.href = "admine.html";
+            } else {
+                errorMsg.style.display = 'block';
+                document.getElementById('adminPasswordInput').style.borderColor = '#f43f5e';
+            }
+        }
+    </script>
+</body>
+</html>

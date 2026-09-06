@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopEase - Admin Control Suite</title>
+    <!-- Chart.js & FontAwesome -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --sidebar-bg: #0b0e27;
+            --main-bg: #f5f6fa;
+            --primary: #5b58ff;
+            --primary-hover: #4845e0;
+            --primary-light: #f0edff;
+            --text-main: #1a1c29;
+            --text-muted: #8e95a9;
+            --white: #ffffff;
+            --border: #eaedf2;
+            --success: #00c9a7;
+            --danger: #de4437;
+            --warning: #ffa726;
+            --info: #42a5f5;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { display: flex; background-color: var(--main-bg); color: var(--text-main); height: 100vh; overflow: hidden; }
+
+        .sidebar { width: 250px; background-color: var(--sidebar-bg); color: #fff; display: flex; flex-direction: column; padding: 24px 18px; flex-shrink: 0; user-select: none; overflow-y: auto; }
+        .sidebar::-webkit-scrollbar { display: none; }
+        .logo-container { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; }
+        .logo-icon { background: #ff4757; color: white; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .logo-text h2 { font-size: 18px; font-weight: 700; }
+        .logo-text span { font-size: 10px; color: var(--text-muted); font-weight: 600; }
+        
+        .nav-menu { list-style: none; flex: 1; }
+        .nav-item { display: flex; align-items: center; gap: 14px; padding: 11px 16px; margin-bottom: 3px; border-radius: 10px; cursor: pointer; color: #7f869e; font-size: 13.5px; font-weight: 500; transition: all 0.2s; }
+        .nav-item i { font-size: 15px; width: 20px; text-align: center; }
+        .nav-item:hover, .nav-item.active { background-color: var(--primary); color: var(--white); }
+        .nav-pill-badge { background: #ff4757; color: white; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; margin-left: auto; }
+        
+        .logout { display: flex; align-items: center; gap: 14px; padding: 10px 16px; color: #7f869e; cursor: pointer; font-size: 13.5px; font-weight: 500; border-radius: 10px; margin-top: auto; }
+        .logout:hover { color: var(--danger); }
+
+        .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 32px; background: var(--main-bg); position: sticky; top: 0; z-index: 10; }
+        .header-right { display: flex; align-items: center; gap: 20px; }
+        .search-wrapper { position: relative; }
+        .search-wrapper i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 13px; }
+        .search-input { padding: 9px 16px 9px 38px; border-radius: 20px; border: 1px solid var(--border); background: var(--white); width: 260px; outline: none; font-size: 13px; }
+        
+        .icon-btn { position: relative; color: var(--text-muted); font-size: 18px; cursor: pointer; }
+        .badge { position: absolute; top: -5px; right: -5px; background: var(--danger); color: white; font-size: 9px; font-weight: bold; width: 15px; height: 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        
+        .profile { display: flex; align-items: center; gap: 10px; }
+        .profile-img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+        .profile-info h4 { font-size: 13px; font-weight: 600; }
+        .profile-info p { font-size: 11px; color: var(--text-muted); }
+
+        .view-content { padding: 0 32px 32px 32px; }
+        .view-pane { display: none; }
+        .view-pane.active { display: block; animation: fadeIn 0.25s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+        .title-bar { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
+        .title-bar h1 { font-size: 20px; font-weight: 700; }
+        .title-bar p { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+        .card { background: var(--white); border-radius: 14px; padding: 20px; border: 1px solid var(--border); margin-bottom: 20px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .card-title { font-size: 14px; font-weight: 600; }
+        
+        .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 20px; }
+        .kpi-card { background: var(--white); border-radius: 14px; padding: 18px; border: 1px solid var(--border); }
+        .kpi-top { display: flex; align-items: flex-start; gap: 12px; }
+        .icon-box { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .kpi-info h3 { font-size: 11.5px; color: var(--text-muted); font-weight: 500; margin-bottom: 4px; }
+        .kpi-info .val { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+        .kpi-info .trend { font-size: 10.5px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+        .trend.up { color: var(--success); }
+
+        .ic-purple { background: #f4f0ff; color: #7e57c2; }
+        .ic-green { background: #e6f9f0; color: #00c9a7; }
+        .ic-orange { background: #fff4e5; color: #ffa726; }
+        .ic-blue { background: #e3f2fd; color: #42a5f5; }
+        .ic-red { background: #ffebee; color: #ef5350; }
+
+        .middle-row { display: grid; grid-template-columns: 2fr 1fr 1.3fr; gap: 16px; margin-bottom: 20px; height: 320px; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 10px 12px; color: var(--text-muted); font-size: 11.5px; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        td { padding: 12px; font-size: 13px; color: var(--text-main); border-bottom: 1px solid var(--border); vertical-align: middle; }
+        
+        .status-badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; display: inline-block; white-space: nowrap; }
+        .status-badge.neworder { background: #e3f2fd; color: #1976d2; }
+        .status-badge.confirmed { background: #e8eaf6; color: #3f51b5; }
+        .status-badge.packed { background: #fff3e0; color: #f57c00; }
+        .status-badge.shipped { background: #e0f7fa; color: #0097a7; }
+        .status-badge.outfordelivery { background: #f3e5f5; color: #8e24aa; }
+        .status-badge.delivered, .status-badge.active, .status-badge.resolved { background: #e8f5e9; color: #388e3c; }
+        .status-badge.cancelled, .status-badge.disabled, .status-badge.closed { background: #ffebee; color: #d32f2f; }
+        .status-badge.cancellationrequested, .status-badge.open { background: #fff8e1; color: #f57f17; }
+        .status-badge.inreview { background: #e3f2fd; color: #0288d1; }
+        .status-badge.returned { background: #eceff1; color: #607d8b; }
+        .status-badge.refunded, .status-badge.expired { background: #e0e0e0; color: #424242; }
+
+        .btn-primary { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 12.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;}
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-sm { padding: 6px 10px; font-size: 11px; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; background: white; transition: 0.2s; }
+        .btn-sm:hover { background: var(--main-bg); }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+        .form-group input, .form-group select, .form-group textarea { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); font-size: 13px; outline: none; }
+        
+        .action-select { padding: 6px; border-radius: 6px; border: 1px solid var(--border); font-size: 11.5px; font-weight: 500; outline: none; background: var(--main-bg); cursor: pointer; }
+        .tracking-text { display: block; margin-top: 4px; font-size: 11px; color: var(--info); font-weight: 600; }
+        .cancel-reason-tag { display: block; margin-top: 4px; font-size: 11px; color: var(--danger); font-weight: 500; background: #ffebee; padding: 2px 6px; border-radius: 4px; }
+        .prod-img-preview { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); background: var(--main-bg); }
+
+        .thumbnail-preview-container { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+        .thumbnail-preview-container img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); }
+
+        .notification-dropdown { position: absolute; top: 40px; right: 0; background: white; border: 1px solid var(--border); border-radius: 12px; width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: none; z-index: 100; max-height: 400px; overflow-y: auto; }
+        .notification-dropdown.active { display: block; }
+        .notif-item { padding: 14px; border-bottom: 1px solid var(--border); font-size: 12px; line-height: 1.5; color: var(--text-main); cursor: pointer; }
+        .notif-item.unread { background: var(--primary-light); font-weight: 600; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: var(--white); padding: 26px; border-radius: 16px; width: 100%; max-width: 480px; position: relative; }
+        .close-modal { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 18px; color: var(--text-muted); }
+        .close-modal:hover { color: var(--danger); }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="logo-container">
+            <div class="logo-icon"><i class="fas fa-shopping-bag"></i></div>
+            <div class="logo-text">
+                <h2>ShopEase</h2>
+                <span>ADMIN CONTROL</span>
+            </div>
+        </div>
+        
+        <ul class="nav-menu">
+            <li class="nav-item active" onclick="switchView('dashboard', this)"><i class="fas fa-home"></i> Dashboard</li>
+            <li class="nav-item" onclick="switchView('orders', this)"><i class="fas fa-shopping-cart"></i> Orders</li>
+            <li class="nav-item" onclick="switchView('reports', this)"><i class="fas fa-headset"></i> Support & Reports <span class="nav-pill-badge" id="ticketNavBadge" style="display:none;">0</span></li>
+            <li class="nav-item" onclick="switchView('products', this)"><i class="fas fa-box"></i> Products</li>
+            <li class="nav-item" onclick="switchView('gateway', this)"><i class="fas fa-university"></i> Payment Gateway</li>
+            <li class="nav-item" onclick="switchView('coupons', this)"><i class="fas fa-ticket-alt"></i> Coupons</li>
+            <li class="nav-item" onclick="switchView('customers', this)"><i class="fas fa-users"></i> Customers</li>
+        </ul>
+
+        <div class="logout" onclick="window.location.href='/'">
+            <i class="fas fa-store"></i> View Storefront
+        </div>
+    </aside>
+
+    <!-- MAIN WRAPPER -->
+    <div class="main-wrapper">
+        <header class="header">
+            <i class="fas fa-bars" style="color:var(--text-muted); cursor:pointer;"></i>
+            <div class="header-right">
+                <div class="search-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="search-input" id="globalSearch" placeholder="Search orders, tickets...">
+                </div>
+                
+                <div class="icon-btn" onclick="toggleNotifications()">
+                    <i class="far fa-bell"></i>
+                    <div class="badge" id="notifBadge" style="display:none;">0</div>
+                    <div class="notification-dropdown" id="notifDropdown"></div>
+                </div>
+
+                <div class="profile">
+                    <img src="https://i.pravatar.cc/150?img=11" alt="Admin" class="profile-img">
+                    <div class="profile-info">
+                        <h4>Admin Manager</h4>
+                        <p>Super Admin</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="view-content">
+
+            <!-- 1. DASHBOARD VIEW -->
+            <div id="view-dashboard" class="view-pane active">
+                <div class="title-bar">
+                    <div>
+                        <h1>Live Operations Dashboard</h1>
+                        <p>Real-time updates synchronized with Firestore backend.</p>
+                    </div>
+                </div>
+
+                <div class="kpi-row">
+                    <div class="kpi-card"><div class="kpi-top"><div class="icon-box ic-purple"><i class="fas fa-shopping-cart"></i></div><div class="kpi-info"><h3>Total Orders</h3><div class="val" id="dashTotalOrders">0</div><div class="trend up">Live Sync</div></div></div></div>
+                    <div class="kpi-card"><div class="kpi-top"><div class="icon-box ic-green"><i class="fas fa-shopping-bag"></i></div><div class="kpi-info"><h3>Total Sales</h3><div class="val" id="dashTotalSales">₹0</div><div class="trend up">Live Realtime</div></div></div></div>
+                    <div class="kpi-card"><div class="kpi-top"><div class="icon-box ic-orange"><i class="fas fa-users"></i></div><div class="kpi-info"><h3>Customers</h3><div class="val" id="dashTotalCustomers">0</div><div class="trend up">Active Buyers</div></div></div></div>
+                    <div class="kpi-card"><div class="kpi-top"><div class="icon-box ic-blue"><i class="fas fa-headset"></i></div><div class="kpi-info"><h3>Open Support</h3><div class="val" id="dashTotalTickets">0</div><div class="trend up">Pending Queries</div></div></div></div>
+                    <div class="kpi-card"><div class="kpi-top"><div class="icon-box ic-red"><i class="fas fa-ticket-alt"></i></div><div class="kpi-info"><h3>Coupons</h3><div class="val" id="dashTotalCoupons">0</div><div class="trend up">Active Discounts</div></div></div></div>
+                </div>
+
+                <div class="middle-row">
+                    <div class="card" style="display:flex; flex-direction:column;">
+                        <div class="card-header"><span class="card-title">Weekly Revenue</span></div>
+                        <div style="flex:1; position:relative;"><canvas id="dashSalesChart"></canvas></div>
+                    </div>
+                    <div class="card" style="display:flex; flex-direction:column;">
+                        <div class="card-header"><span class="card-title">Order Status Share</span></div>
+                        <div style="flex:1; position:relative; display:flex; align-items:center;">
+                            <canvas id="dashOrderChart" style="max-height:180px;"></canvas>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><span class="card-title">Recent Inflow</span></div>
+                        <div id="dashRecentOrdersList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. ORDERS VIEW -->
+            <div id="view-orders" class="view-pane">
+                <div class="title-bar">
+                    <div><h1>Orders Master Management</h1><p>Process order status, approve cancellations, and trigger tracking codes.</p></div>
+                </div>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Product Details</th>
+                                <th>Payment & Amount</th>
+                                <th>Order Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3. SUPPORT & REPORTS VIEW -->
+            <div id="view-reports" class="view-pane">
+                <div class="title-bar">
+                    <div>
+                        <h1>Customer Support & Reports Center</h1>
+                        <p>Customer inquiries, complaints, and shipped order cancellation requests.</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date / Ticket</th>
+                                <th>Customer</th>
+                                <th>Category</th>
+                                <th>Order Reference</th>
+                                <th>Customer Message</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTicketsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 4. PRODUCTS VIEW -->
+            <div id="view-products" class="view-pane">
+                <div class="title-bar">
+                    <div><h1>Product Catalog</h1><p>Add and manage inventory items with multiple image slides.</p></div>
+                </div>
+                <div class="card">
+                    <div class="card-title" id="productFormTitle" style="margin-bottom:15px;">Add New Product</div>
+                    <input type="hidden" id="editingProductId" value="">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Product Name</label><input type="text" id="pName" placeholder="e.g. Wireless Headphones"></div>
+                        <div class="form-group"><label>Category</label><select id="pCat"><option>Electronics</option><option>Fashion</option><option>Home & Kitchen</option><option>Beauty & Health</option></select></div>
+                        <div class="form-group"><label>Price (₹)</label><input type="number" id="pPrice" placeholder="2999"></div>
+                        <div class="form-group"><label>Stock Units</label><input type="number" id="pStock" placeholder="25"></div>
+                        <div class="form-group">
+                            <label>Product Images (Multiple)</label>
+                            <input type="file" id="pImage" accept="image/*" multiple style="background:var(--white); padding: 5px;">
+                            <div id="imagePreviewContainer" class="thumbnail-preview-container"></div>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:12px;">
+                        <button class="btn-primary" id="productSaveBtn" onclick="saveProduct()"><i class="fas fa-plus"></i> Publish to Storefront</button>
+                        <button class="btn-sm" id="productCancelBtn" onclick="resetProductForm()" style="display:none; padding:8px 16px;">Cancel Edit</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-title" style="margin-bottom:15px;">Active Store Inventory</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Images</th>
+                                <th>Item Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 5. GATEWAY SETUP VIEW -->
+            <div id="view-gateway" class="view-pane">
+                <div class="title-bar">
+                    <div><h1>Payment Gateway Configuration</h1><p>Provide banking and UPI channels displayed to customers during checkout.</p></div>
+                </div>
+                <div class="card" style="max-width: 800px;">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Bank Name</label><input type="text" id="gwBank" placeholder="e.g. State Bank of India"></div>
+                        <div class="form-group"><label>Account Number</label><input type="text" id="gwAcc" placeholder="1234567890"></div>
+                        <div class="form-group"><label>IFSC Code</label><input type="text" id="gwIfsc" placeholder="SBIN0001234"></div>
+                        <div class="form-group"><label>UPI ID (VPA)</label><input type="text" id="gwUpi" placeholder="merchant@upi"></div>
+                        <div class="form-group">
+                            <label>Payment QR Code Image</label>
+                            <input type="file" id="gwQr" accept="image/*" style="background:var(--white); padding: 5px;">
+                        </div>
+                    </div>
+                    <img id="gwQrPreview" style="max-width:160px; display:none; margin-bottom:15px; border-radius:8px; border:1px solid var(--border);">
+                    <br>
+                    <button class="btn-primary" onclick="saveGateway()"><i class="fas fa-save"></i> Save & Broadcast Gateway</button>
+                </div>
+            </div>
+
+            <!-- 6. COUPONS VIEW -->
+            <div id="view-coupons" class="view-pane">
+                <div class="title-bar">
+                    <div><h1>Discount Coupons</h1><p>Create and manage discount codes applicable at checkout.</p></div>
+                </div>
+                <div class="card">
+                    <div class="card-title" style="margin-bottom:15px;" id="couponFormTitle">Create Discount Coupon</div>
+                    <div class="form-grid">
+                        <input type="hidden" id="cId" value="">
+                        <div class="form-group"><label>Coupon Code</label><input type="text" id="cCode" placeholder="e.g. MEGA50" style="text-transform:uppercase;"></div>
+                        <div class="form-group"><label>Discount (%)</label><input type="number" id="cDiscount" placeholder="10"></div>
+                        <div class="form-group"><label>Expiry Date</label><input type="date" id="cExpiry"></div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="cStatus">
+                                <option value="Active">Active</option>
+                                <option value="Disabled">Disabled</option>
+                                <option value="Expired">Expired</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:12px;">
+                        <button class="btn-primary" id="couponSaveBtn" onclick="saveCoupon()"><i class="fas fa-ticket-alt"></i> Publish Coupon</button>
+                        <button class="btn-sm" id="couponCancelBtn" onclick="resetCouponForm()" style="display:none; padding:8px 16px;">Cancel</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Discount</th>
+                                <th>Status</th>
+                                <th>Expiry</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="couponsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 7. CUSTOMERS VIEW -->
+            <div id="view-customers" class="view-pane">
+                <div class="title-bar"><h1>Customer Registry</h1></div>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Customer Name</th>
+                                <th>Total Orders Placed</th>
+                                <th>Last Purchase Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- TICKET RESPONSE MODAL -->
+    <div class="modal-overlay" id="ticketReplyModal">
+        <div class="modal-content">
+            <i class="fas fa-times close-modal" onclick="closeTicketModal()"></i>
+            <h3 style="font-size:16px; margin-bottom:6px; font-weight:700;"><i class="fas fa-reply" style="color:var(--primary);"></i> Reply to Customer</h3>
+            <p id="replyTicketMeta" style="font-size:12px; color:var(--text-muted); margin-bottom:16px;"></p>
+            
+            <input type="hidden" id="replyTicketId">
+            <div class="form-group">
+                <label>Set Ticket Status</label>
+                <select id="replyTicketStatus">
+                    <option value="In Review">In Review</option>
+                    <option value="Resolved">Resolved</option>
+                    <option value="Closed">Closed</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Your Response Message</label>
+                <textarea id="replyTicketMessage" rows="4" placeholder="Write a response message that will reflect on the user's dashboard..."></textarea>
+            </div>
+            <button class="btn-primary" style="width:100%; justify-content:center; margin-top:10px;" onclick="sendTicketReply()">Send Response to User</button>
+        </div>
+    </div>
+
+    <!-- FIREBASE COMPAT SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDiUNu9FQUSmrklasMZO9_pQv4PL2JZLso",
+            authDomain: "e-comerce-management.firebaseapp.com",
+            databaseURL: "https://e-comerce-management-default-rtdb.firebaseio.com",
+            projectId: "e-comerce-management",
+            storageBucket: "e-comerce-management.firebasestorage.app",
+            messagingSenderId: "1098286410089",
+            appId: "1:1098286410089:web:0b045a41e424ee149cb5f8",
+            measurementId: "G-RS4NJXFBQX"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let orders = [];
+        let products = [];
+        let coupons = [];
+        let supportTickets = [];
+        let newProductImageArray = [];
+        let newQrImageBase64 = null;
+
+        function switchView(viewName, element = null) {
+            document.querySelectorAll('.view-pane').forEach(el => el.classList.remove('active'));
+            const targetView = document.getElementById('view-' + viewName);
+            if(targetView) targetView.classList.add('active');
+
+            if (element) {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                element.classList.add('active');
+            }
+        }
+
+        db.collection("orders").onSnapshot((snapshot) => {
+            orders = [];
+            let totalSales = 0;
+            const customerMap = {};
+
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                orders.push({ docId: doc.id, ...data });
+                const num = parseInt(data.price?.toString().replace(/[^0-9]/g, '')) || 0;
+                totalSales += num;
+
+                if (data.user) {
+                    if (!customerMap[data.user]) customerMap[data.user] = { count: 0, lastPrice: data.price };
+                    customerMap[data.user].count++;
+                }
+            });
+
+            orders.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+            document.getElementById('dashTotalSales').innerText = '₹' + totalSales.toLocaleString();
+            document.getElementById('dashTotalCustomers').innerText = Object.keys(customerMap).length;
+            renderOrders();
+            renderCustomerSummary(customerMap);
+        });
+
+        db.collection("support_tickets").onSnapshot((snapshot) => {
+            supportTickets = [];
+            let openCount = 0;
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                if ((data.status || 'Open').toLowerCase() === 'open') openCount++;
+                supportTickets.push({ docId: doc.id, ...data });
+            });
+            supportTickets.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+            document.getElementById('dashTotalTickets').innerText = openCount;
+            const navBadge = document.getElementById('ticketNavBadge');
+            if (openCount > 0) {
+                navBadge.style.display = 'inline-block';
+                navBadge.innerText = openCount;
+            } else {
+                navBadge.style.display = 'none';
+            }
+            renderSupportTickets();
+        });
+
+        db.collection("products").onSnapshot((snapshot) => {
+            products = [];
+            snapshot.forEach((doc) => { products.push({ docId: doc.id, ...doc.data() }); });
+            renderProducts();
+        });
+
+        db.collection("coupons").onSnapshot((snapshot) => {
+            coupons = [];
+            snapshot.forEach((doc) => { coupons.push({ docId: doc.id, ...doc.data() }); });
+            renderCoupons();
+        });
+
+        db.collection("settings").doc("paymentGateway").onSnapshot(doc => {
+            if(doc.exists) {
+                const gw = doc.data();
+                document.getElementById('gwBank').value = gw.bankName || '';
+                document.getElementById('gwAcc').value = gw.accNo || '';
+                document.getElementById('gwIfsc').value = gw.ifsc || '';
+                document.getElementById('gwUpi').value = gw.upiId || '';
+                if(gw.qrImg) {
+                    newQrImageBase64 = gw.qrImg;
+                    const preview = document.getElementById('gwQrPreview');
+                    preview.src = gw.qrImg;
+                    preview.style.display = 'block';
+                }
+            }
+        });
+
+        db.collection("notifications").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+            const dropdown = document.getElementById('notifDropdown');
+            dropdown.innerHTML = '';
+            let unreadCount = 0;
+            if(snapshot.empty) {
+                dropdown.innerHTML = '<div class="notif-item">No new alerts.</div>';
+            } else {
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if(!data.read) unreadCount++;
+                    dropdown.innerHTML += `
+                        <div class="notif-item ${!data.read ? 'unread' : ''}" onclick="markNotifRead('${doc.id}')">
+                            ${data.message}
+                            <div style="font-size:10px; color:var(--text-muted); margin-top:4px;">Live Alert</div>
+                        </div>
+                    `;
+                });
+            }
+            const badge = document.getElementById('notifBadge');
+            if(unreadCount > 0) {
+                badge.style.display = 'flex';
+                badge.innerText = unreadCount;
+            } else {
+                badge.style.display = 'none';
+            }
+        });
+
+        function toggleNotifications() { document.getElementById('notifDropdown').classList.toggle('active'); }
+        function markNotifRead(docId) { db.collection("notifications").doc(docId).update({ read: true }); }
+
+        function renderOrders() {
+            const tbody = document.getElementById('ordersTableBody');
+            tbody.innerHTML = '';
+            document.getElementById('dashTotalOrders').innerText = orders.length;
+
+            orders.forEach((o) => {
+                const statusStr = o.status || 'New Order';
+                const badgeClass = statusStr.toLowerCase().replace(/\s+/g, '');
+                const trackingUI = o.tracking ? `<span class="tracking-text"><i class="fas fa-truck"></i> ${o.tracking}</span>` : '';
+                const cancelReasonUI = o.cancelReason ? `<span class="cancel-reason-tag"><i class="fas fa-exclamation-circle"></i> Reason: ${o.cancelReason}</span>` : '';
+                const isNew = statusStr === 'New Order';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>#${o.docId.substring(0,6).toUpperCase()}</strong> ${trackingUI} ${cancelReasonUI}</td>
+                        <td>${o.user || 'Guest User'}</td>
+                        <td>${o.title || o.items || 'Standard Package'}</td>
+                        <td><span style="font-weight:600;">${o.payment || 'N/A'}</span><br><span style="font-size:11px; color:var(--text-muted);">${o.price}</span></td>
+                        <td><span class="status-badge ${badgeClass}">${statusStr}</span></td>
+                        <td>
+                            <select class="action-select" onchange="updateOrderStatus('${o.docId}', this.value, '${o.tracking || ''}')">
+                                <option value="" disabled selected>Update Progress</option>
+                                <option value="Confirmed" ${!isNew ? 'disabled':''}>1. Confirm (Generate AWB)</option>
+                                <option value="Packed">2. Mark Packed</option>
+                                <option value="Shipped">3. Mark Shipped</option>
+                                <option value="Out for Delivery">4. Out for Delivery</option>
+                                <option value="Delivered">5. Mark Delivered</option>
+                                <option disabled>──────────</option>
+                                <option value="Cancelled">Approve Cancel / Cancel Order</option>
+                            </select>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function updateOrderStatus(docId, newStatus, currentTracking) {
+            let updatePayload = { status: newStatus };
+            if (newStatus === 'Confirmed' && (!currentTracking || currentTracking === '')) {
+                const generatedAWB = 'AWB' + Math.floor(10000000 + Math.random() * 90000000);
+                updatePayload.tracking = generatedAWB;
+            } else if (newStatus === 'Cancelled') {
+                updatePayload.expectedDelivery = 'Order Cancelled by Store';
+            }
+            db.collection("orders").doc(docId).update(updatePayload);
+        }
+
+        function renderSupportTickets() {
+            const tbody = document.getElementById('adminTicketsTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            if (supportTickets.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:24px; color:var(--text-muted);">No reports or queries found.</td></tr>';
+                return;
+            }
+            supportTickets.forEach((t) => {
+                const statusStr = t.status || 'Open';
+                const badgeClass = statusStr.toLowerCase().replace(/\s+/g, '');
+                const dateStr = t.timestamp ? new Date(t.timestamp.seconds * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Just now';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${t.subject || 'Support Query'}</strong><br><span style="font-size:11px; color:var(--text-muted);">${dateStr}</span></td>
+                        <td><strong>${t.user || 'Customer'}</strong></td>
+                        <td><span style="font-size:12px;">${t.category || 'General'}</span></td>
+                        <td><span style="font-size:12px; color:var(--info); font-weight:600;">${t.relatedOrder || 'None'}</span></td>
+                        <td>
+                            <span style="font-size:12.5px;">${t.message}</span>
+                            ${t.adminReply ? `<div style="font-size:11px; color:var(--primary); margin-top:4px;"><strong>Admin Reply:</strong> ${t.adminReply}</div>` : ''}
+                        </td>
+                        <td><span class="status-badge ${badgeClass}">${statusStr}</span></td>
+                        <td><button class="btn-sm" style="color:var(--primary);" onclick="openTicketModal('${t.docId}')"><i class="fas fa-reply"></i> Reply</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function openTicketModal(docId) {
+            const ticket = supportTickets.find(x => x.docId === docId);
+            if (!ticket) return;
+            document.getElementById('replyTicketId').value = docId;
+            document.getElementById('replyTicketMeta').innerText = `Subject: "${ticket.subject}" | From: ${ticket.user}`;
+            document.getElementById('replyTicketStatus').value = ticket.status || 'In Review';
+            document.getElementById('replyTicketMessage').value = ticket.adminReply || '';
+            document.getElementById('ticketReplyModal').classList.add('active');
+        }
+
+        function closeTicketModal() { document.getElementById('ticketReplyModal').classList.remove('active'); }
+
+        function sendTicketReply() {
+            const docId = document.getElementById('replyTicketId').value;
+            const status = document.getElementById('replyTicketStatus').value;
+            const replyMsg = document.getElementById('replyTicketMessage').value.trim();
+            if (!replyMsg) return alert('Please enter a reply message.');
+
+            db.collection("support_tickets").doc(docId).update({
+                status: status,
+                adminReply: replyMsg,
+                repliedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                alert('✅ Response successfully posted!');
+                closeTicketModal();
+            });
+        }
+
+        function renderCustomerSummary(customerMap) {
+            const tbody = document.getElementById('customersTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            Object.keys(customerMap).forEach(cust => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${cust}</strong></td>
+                        <td>${customerMap[cust].count} orders</td>
+                        <td>${customerMap[cust].lastPrice}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        document.getElementById('gwQr').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) { 
+                    newQrImageBase64 = evt.target.result;
+                    const preview = document.getElementById('gwQrPreview');
+                    preview.src = newQrImageBase64;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function saveGateway() {
+            const payload = {
+                bankName: document.getElementById('gwBank').value,
+                accNo: document.getElementById('gwAcc').value,
+                ifsc: document.getElementById('gwIfsc').value,
+                upiId: document.getElementById('gwUpi').value,
+                qrImg: newQrImageBase64 || null
+            };
+            db.collection("settings").doc("paymentGateway").set(payload, { merge: true })
+            .then(() => alert("✅ Payment Gateway settings saved!"));
+        }
+
+        // PRODUCT CRUD LOGIC
+        function renderProducts() {
+            const tbody = document.getElementById('productsTableBody');
+            tbody.innerHTML = '';
+            products.forEach((p) => {
+                const primaryImg = (Array.isArray(p.images) && p.images.length > 0) ? p.images[0] : (p.img || 'https://via.placeholder.com/44');
+                tbody.innerHTML += `
+                    <tr>
+                        <td><img src="${primaryImg}" class="prod-img-preview"></td>
+                        <td><strong>${p.name}</strong></td>
+                        <td>${p.cat}</td>
+                        <td>${p.price}</td>
+                        <td>${p.stock} units</td>
+                        <td>
+                            <button class="btn-sm" style="color:var(--info); margin-right:4px;" onclick="editProduct('${p.docId}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn-sm" style="color:var(--danger);" onclick="deleteProduct('${p.docId}')"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        document.getElementById('pImage').addEventListener('change', function(e) {
+            const files = e.target.files;
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            previewContainer.innerHTML = '';
+            newProductImageArray = [];
+
+            if (files && files.length > 0) {
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(evt) {
+                        newProductImageArray.push(evt.target.result);
+                        previewContainer.innerHTML += `<img src="${evt.target.result}">`;
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        });
+
+        function saveProduct() {
+            const editingId = document.getElementById('editingProductId').value;
+            const name = document.getElementById('pName').value.trim();
+            const cat = document.getElementById('pCat').value;
+            const price = document.getElementById('pPrice').value.trim();
+            const stock = document.getElementById('pStock').value.trim();
+            
+            if(!name || !price) return alert('Please enter product title and price.');
+            
+            const initials = name.split(' ').map(n => n[0]).join('+').toUpperCase();
+            const fallbackImg = `https://ui-avatars.com/api/?name=${initials}&background=f0edff&color=5b58ff&size=200`;
+            
+            let finalImages = (newProductImageArray.length > 0) ? newProductImageArray : null;
+
+            let payload = {
+                name: name,
+                cat: cat,
+                price: '₹' + parseInt(price).toLocaleString(),
+                stock: parseInt(stock) || 10
+            };
+
+            if (finalImages) {
+                payload.images = finalImages;
+                payload.img = finalImages[0];
+            }
+
+            if (editingId) {
+                db.collection("products").doc(editingId).update(payload).then(() => {
+                    alert('✅ Product updated successfully!');
+                    resetProductForm();
+                });
+            } else {
+                payload.images = finalImages || [fallbackImg];
+                payload.img = payload.images[0];
+                payload.timestamp = firebase.firestore.FieldValue.serverTimestamp();
+
+                db.collection("products").add(payload).then(() => {
+                    alert('✅ Product published live to Storefront!');
+                    resetProductForm();
+                });
+            }
+        }
+
+        function editProduct(docId) {
+            const p = products.find(x => x.docId === docId);
+            if (!p) return;
+            document.getElementById('editingProductId').value = p.docId;
+            document.getElementById('pName').value = p.name;
+            document.getElementById('pCat').value = p.cat;
+            document.getElementById('pPrice').value = parseInt(p.price.replace(/[^0-9]/g, '')) || 0;
+            document.getElementById('pStock').value = p.stock;
+            
+            newProductImageArray = p.images || [p.img];
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            previewContainer.innerHTML = '';
+            newProductImageArray.forEach(imgSrc => {
+                previewContainer.innerHTML += `<img src="${imgSrc}">`;
+            });
+
+            document.getElementById('productFormTitle').innerText = "Edit Product Details";
+            document.getElementById('productSaveBtn').innerHTML = '<i class="fas fa-save"></i> Update Product';
+            document.getElementById('productCancelBtn').style.display = 'inline-block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function deleteProduct(docId) {
+            if(confirm('Delete this product?')) db.collection("products").doc(docId).delete();
+        }
+
+        function resetProductForm() {
+            document.getElementById('editingProductId').value = '';
+            document.getElementById('pName').value = '';
+            document.getElementById('pPrice').value = '';
+            document.getElementById('pStock').value = '';
+            document.getElementById('pImage').value = '';
+            document.getElementById('imagePreviewContainer').innerHTML = '';
+            newProductImageArray = [];
+            document.getElementById('productFormTitle').innerText = "Add New Product";
+            document.getElementById('productSaveBtn').innerHTML = '<i class="fas fa-plus"></i> Publish to Storefront';
+            document.getElementById('productCancelBtn').style.display = 'none';
+        }
+
+        // COUPON MANAGEMENT
+        function renderCoupons() {
+            const tbody = document.getElementById('couponsTableBody');
+            tbody.innerHTML = '';
+            coupons.forEach(c => {
+                let badgeClass = c.status === 'Active' ? 'active' : (c.status === 'Disabled' ? 'returned' : 'cancelled');
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong style="color:var(--primary);">${c.code}</strong></td>
+                        <td>${c.discount}</td>
+                        <td><span class="status-badge ${badgeClass}">${c.status}</span></td>
+                        <td>${c.expiry}</td>
+                        <td>
+                            <button class="btn-sm" style="color:var(--info); margin-right:6px;" onclick="editCoupon('${c.docId}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn-sm" style="color:var(--danger);" onclick="deleteCoupon('${c.docId}')"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('dashTotalCoupons').innerText = coupons.length;
+        }
+
+        function saveCoupon() {
+            const id = document.getElementById('cId').value;
+            const code = document.getElementById('cCode').value.toUpperCase().trim();
+            const discount = document.getElementById('cDiscount').value.trim();
+            const expiry = document.getElementById('cExpiry').value;
+            const status = document.getElementById('cStatus').value;
+            if(!code || !discount) return alert('Enter coupon code and discount percentage');
+
+            const payload = {
+                code: code,
+                discount: discount.includes('%') ? discount : discount + '%',
+                expiry: expiry || 'No Expiry',
+                status: status,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            if (id) {
+                db.collection("coupons").doc(id).update(payload).then(() => { alert('Updated!'); resetCouponForm(); });
+            } else {
+                db.collection("coupons").add(payload).then(() => { alert('Created!'); resetCouponForm(); });
+            }
+        }
+
+        function editCoupon(docId) {
+            const c = coupons.find(x => x.docId === docId);
+            if(!c) return;
+            document.getElementById('cId').value = c.docId;
+            document.getElementById('cCode').value = c.code;
+            document.getElementById('cDiscount').value = parseInt(c.discount.replace('%', ''));
+            document.getElementById('cExpiry').value = c.expiry === 'No Expiry' ? '' : c.expiry;
+            document.getElementById('cStatus').value = c.status || 'Active';
+        }
+
+        function deleteCoupon(docId) { if(confirm('Delete coupon?')) db.collection("coupons").doc(docId).delete(); }
+        function resetCouponForm() { document.getElementById('cId').value = ''; document.getElementById('cCode').value = ''; document.getElementById('cDiscount').value = ''; }
+
+        window.onload = function() {
+            new Chart(document.getElementById('dashSalesChart').getContext('2d'), {
+                type: 'line', 
+                data: { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], datasets: [{ data: [28000, 42000, 39000, 65000, 52000, 78000, 61000], borderColor: '#5b58ff', backgroundColor: 'rgba(91,88,255,0.1)', borderWidth: 2, tension: 0.4, fill: true, pointRadius: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { border: { display: false } }, x: { grid: { display: false } } } }
+            });
+            new Chart(document.getElementById('dashOrderChart').getContext('2d'), {
+                type: 'doughnut', 
+                data: { labels: ['Delivered', 'In Transit', 'Pending', 'Cancelled'], datasets: [{ data: [55, 25, 15, 5], backgroundColor: ['#00c9a7', '#42a5f5', '#ffa726', '#de4437'], borderWidth: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+            });
+        };
+    </script>
+</body>
+</html>
