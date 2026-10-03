@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Developer Portfolio | Tech Horizon</title>
+    <title>Developer Portfolio | Tech Pranshu</title>
     <!-- Font Awesome for Modern Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -531,7 +531,7 @@
 
     <!-- SYSTEM NAVBAR -->
     <header>
-        <a href="#home" class="logo">TECH<span>MINDS.</span></a>
+        <a href="#home" class="logo">TECH<span>PRANSHU.</span></a>
         <ul class="nav-links" id="menuMatrix">
             <li><a href="#home" class="nav-item active">Home</a></li>
             <li><a href="#about" class="nav-item">About</a></li>
@@ -698,11 +698,17 @@
                 </div>
             </div>
             <form class="engine-form" id="contactEngine">
-                <div class="form-row"><input type="text" id="username" placeholder="Enter Your Name" required></div>
-                <div class="form-row"><input type="email" id="useremail" placeholder="Enter Your Mail" required></div>
-                <div class="form-row"><textarea id="usermessage" rows="5" placeholder="Transmission Details" required></textarea></div>
-                <button type="submit" class="btn">SEND DETAILS</button>
-            </form>
+    <div class="form-row">
+        <input type="text" name="name" id="username" placeholder="Enter Your Name" required>
+    </div>
+    <div class="form-row">
+        <input type="email" name="email" id="useremail" placeholder="Enter Your Mail" required>
+    </div>
+    <div class="form-row">
+        <textarea name="message" id="usermessage" rows="5" placeholder="Transmission Details / Message" required></textarea>
+    </div>
+    <button type="submit" class="btn" style="width: 100 %; justify-content: center;">Send Details</button>
+</form>
         </div>
     </section>
 
@@ -717,6 +723,15 @@
         
         <p>&copy; 2026 TECH PRANSHU // TECH MINDS </p>
     </footer>
+     <!--Include the EmailJS SDK in Your -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+    (function() {
+        emailjs.init({
+            publicKey: "SUmePoWyFGuwlbxe0",
+        });
+    })();
+</script>
 
     <!-- INTERACTIVE SCRIPTS -->
     <script>
@@ -818,10 +833,28 @@
             }
         });
 
-        // --- 5. SECURE SIMULATED TRANSMISSION FORM PROCESSING ---
-        document.getElementById('contactEngine').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const callerName = document.getElementById('username').value;
+       // --- 5. SECURE SIMULATED TRANSMISSION FORM PROCESSING ---
+       document.getElementById('contactEngine').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.textContent = 'Transmitting...';
+    submitBtn.disabled = true;
+
+    // Service ID, Template ID, Form Element
+    emailjs.sendForm('service_cfxl8no', 'template_r93axbk', this)
+        .then(() => {
+            alert('TRANSMISSION SUCCESSFUL: Signal received. I will respond to your transmission shortly.');
+            document.getElementById('contactEngine').reset();
+        })
+        .catch((error) => {
+            console.error('EmailJS error:', error);
+            alert('TRANSMISSION FAILED: Check system console or try again later.');
+        })
+        .finally(() => {
+            submitBtn.textContent = 'Send Details';
+            submitBtn.disabled = false;
+        });
             
             // Notification response simulation
             alert(`TRANSMISSION COMPLETION: Thank you, ${callerName}. Signal successfully piped and processed through the system.`);
