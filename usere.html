@@ -23,6 +23,8 @@
             --warning: #ff754c; 
             --warning-bg: #ffece5; 
             --danger: #de4437;
+            --footer-bg: #0f1322;
+            --footer-border: #1e2438;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -95,7 +97,7 @@
         .marquee-content { display: flex; gap: 80px; animation: scroll-left 25s linear infinite; }
         @keyframes scroll-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        .dashboard-body { padding: 32px; max-width: 1400px; margin: 0 auto; width: 100%; }
+        .dashboard-body { padding: 32px; max-width: 1400px; margin: 0 auto; width: 100%; flex: 1; }
         .view-pane { display: none; animation: fadeIn 0.3s ease; }
         .view-pane.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -152,42 +154,11 @@
         .form-group label { font-size: 13px; font-weight: 600; }
         .form-group input, .form-group textarea, .form-group select { padding: 12px; border-radius: 10px; border: 1px solid var(--border); font-size: 14px; outline: none; background: #f8f9fe; }
 
-        /* PROFILE PICTURE UPLOADER STYLING */
-        .avatar-edit-wrapper {
-            position: relative;
-            width: 88px;
-            height: 88px;
-            flex-shrink: 0;
-        }
-        .avatar-edit-wrapper img {
-            width: 88px;
-            height: 88px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid var(--primary);
-            box-shadow: 0 4px 14px rgba(108, 93, 211, 0.2);
-        }
-        .avatar-upload-trigger {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 30px;
-            height: 30px;
-            background: var(--primary);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-            transition: transform 0.2s, background 0.2s;
-            border: 2px solid white;
-        }
-        .avatar-upload-trigger:hover {
-            transform: scale(1.1);
-            background: #5648c9;
-        }
+        /* AVATAR STYLES */
+        .avatar-edit-wrapper { position: relative; width: 88px; height: 88px; flex-shrink: 0; }
+        .avatar-edit-wrapper img { width: 88px; height: 88px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); box-shadow: 0 4px 14px rgba(108, 93, 211, 0.2); }
+        .avatar-upload-trigger { position: absolute; bottom: 0; right: 0; width: 30px; height: 30px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.25); transition: transform 0.2s, background 0.2s; border: 2px solid white; }
+        .avatar-upload-trigger:hover { transform: scale(1.1); background: #5648c9; }
 
         .slider-container { position: relative; width: 100%; height: 220px; border-radius: 16px; overflow: hidden; margin-bottom: 20px; background: #000; }
         .slider-track { display: flex; height: 100%; transition: transform 0.3s ease-in-out; }
@@ -200,6 +171,167 @@
         .auth-card { background: white; border-radius: 20px; padding: 36px; width: 100%; max-width: 420px; box-shadow: 0 20px 50px rgba(0,0,0,0.25); text-align: center; }
         .auth-step { display: none; text-align: left; }
         .auth-step.active { display: block; }
+
+        /* TRUST-BUILDING PROFESSIONAL FOOTER */
+        .site-footer {
+            background-color: var(--footer-bg);
+            color: #d1d5db;
+            margin-top: auto;
+            border-top: 1px solid var(--footer-border);
+            font-size: 13px;
+        }
+        
+        .trust-strip {
+            background: #14192b;
+            border-bottom: 1px solid var(--footer-border);
+            padding: 24px 32px;
+        }
+        .trust-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+        }
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .trust-item i {
+            font-size: 26px;
+            color: var(--primary);
+            background: rgba(108, 93, 211, 0.12);
+            padding: 12px;
+            border-radius: 12px;
+        }
+        .trust-item h4 {
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+        .trust-item p {
+            color: #8b92a5;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .footer-main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 48px 32px 32px;
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr 1.3fr;
+            gap: 40px;
+        }
+        .footer-col h3 {
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .footer-col p {
+            line-height: 1.7;
+            color: #9aa1b3;
+            margin-bottom: 16px;
+        }
+        .footer-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .footer-links li a {
+            color: #9aa1b3;
+            text-decoration: none;
+            transition: color 0.2s, padding-left 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .footer-links li a:hover {
+            color: white;
+            padding-left: 4px;
+        }
+        
+        .contact-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .contact-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            color: #9aa1b3;
+        }
+        .contact-list li i {
+            color: var(--primary);
+            font-size: 15px;
+            margin-top: 3px;
+        }
+
+        .payment-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .pay-pill {
+            background: #192036;
+            color: #d1d5db;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11.5px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid var(--footer-border);
+        }
+
+        .footer-bottom {
+            background: #090c15;
+            padding: 20px 32px;
+            border-top: 1px solid var(--footer-border);
+            font-size: 12px;
+        }
+        .footer-bottom-wrap {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            color: #798197;
+        }
+        .ssl-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--success);
+            font-weight: 600;
+            background: rgba(50, 167, 112, 0.1);
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(50, 167, 112, 0.25);
+        }
+
+        @media (max-width: 992px) {
+            .footer-main { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 600px) {
+            .footer-main { grid-template-columns: 1fr; padding: 32px 20px; }
+            .trust-strip { padding: 20px; }
+            .footer-bottom { padding: 20px; }
+        }
     </style>
 </head>
 <body>
@@ -432,7 +564,7 @@
                 <div class="product-grid" id="wishlistGridContainer"></div>
             </div>
 
-            <!-- 8. SETTINGS VIEW (WITH PROFILE PICTURE UPLOADER) -->
+            <!-- 8. SETTINGS VIEW -->
             <div id="view-settings" class="view-pane">
                 <div class="title-bar"><h1>Account Profile Settings</h1></div>
                 <div class="card" style="max-width: 600px;">
@@ -485,6 +617,111 @@
             </div>
 
         </div>
+
+        <!-- PROFESSIONAL TRUST & FOOTER COMPONENT -->
+        <footer class="site-footer">
+            <div class="trust-strip">
+                <div class="trust-container">
+                    <div class="trust-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <div>
+                            <h4>100% Genuine Products</h4>
+                            <p>Direct from verified distributors & brands</p>
+                        </div>
+                    </div>
+                    <div class="trust-item">
+                        <i class="fas fa-truck-fast"></i>
+                        <div>
+                            <h4>Express Delivery</h4>
+                            <p>Free doorstep shipping on orders above ₹999</p>
+                        </div>
+                    </div>
+                    <div class="trust-item">
+                        <i class="fas fa-lock"></i>
+                        <div>
+                            <h4>256-Bit SSL Protection</h4>
+                            <p>Bank-grade encrypted & tokenized payments</p>
+                        </div>
+                    </div>
+                    <div class="trust-item">
+                        <i class="fas fa-arrow-rotate-left"></i>
+                        <div>
+                            <h4>7-Day Easy Returns</h4>
+                            <p>Guaranteed replacement or direct bank refund</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-main">
+                <div class="footer-col">
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+                        <div class="brand-icon"><i class="fas fa-shopping-bag"></i></div>
+                        <h2 style="font-size:20px; font-weight:700; color:white;">ShopEase</h2>
+                    </div>
+                    <p>Your premier destination for verified electronics, fashion essentials, and modern lifestyle essentials. Engineered for fast fulfillment and transparent shopping.</p>
+                    <div style="display:flex; gap:12px; margin-top:16px;">
+                        <span style="display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:8px; background:#1e2438; color:white; cursor:pointer;"><i class="fab fa-facebook-f"></i></span>
+                        <span style="display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:8px; background:#1e2438; color:white; cursor:pointer;"><i class="fab fa-instagram"></i></span>
+                        <span style="display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:8px; background:#1e2438; color:white; cursor:pointer;"><i class="fab fa-x-twitter"></i></span>
+                        <span style="display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:8px; background:#1e2438; color:white; cursor:pointer;"><i class="fab fa-whatsapp"></i></span>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h3>Explore Categories</h3>
+                    <ul class="footer-links">
+                        <li><a href="javascript:void(0)" onclick="filterCategory('Electronics'); switchUserView('dashboard');"><i class="fas fa-angle-right"></i> Consumer Electronics</a></li>
+                        <li><a href="javascript:void(0)" onclick="filterCategory('Fashion'); switchUserView('dashboard');"><i class="fas fa-angle-right"></i> Seasonal Fashion</a></li>
+                        <li><a href="javascript:void(0)" onclick="filterCategory('Home & Kitchen'); switchUserView('dashboard');"><i class="fas fa-angle-right"></i> Home & Living</a></li>
+                        <li><a href="javascript:void(0)" onclick="switchUserView('coupons');"><i class="fas fa-angle-right"></i> Discount Deals & Coupons</a></li>
+                        <li><a href="javascript:void(0)" onclick="switchUserView('wishlist');"><i class="fas fa-angle-right"></i> Saved Wishlist</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h3>Customer Care & Trust</h3>
+                    <ul class="footer-links">
+                        <li><a href="javascript:void(0)" onclick="switchUserView('orders');"><i class="fas fa-angle-right"></i> Track Your Package</a></li>
+                        <li><a href="javascript:void(0)" onclick="switchUserView('support');"><i class="fas fa-angle-right"></i> Raise a Support Ticket</a></li>
+                        <li><a href="javascript:void(0)" onclick="alert('Return Policy: Products are eligible for return/replacement within 7 days of delivery in their original condition.');"><i class="fas fa-angle-right"></i> Return & Refund Policy</a></li>
+                        <li><a href="javascript:void(0)" onclick="alert('Shipping Policy: Orders placed before 4:00 PM are dispatched on the same business day with typical delivery in 2-4 business days.');"><i class="fas fa-angle-right"></i> Shipping & Logistics</a></li>
+                        <li><a href="javascript:void(0)" onclick="alert('Privacy Statement: ShopEase implements end-to-end data encryption and never shares transaction information with unauthorized third parties.');"><i class="fas fa-angle-right"></i> Privacy & Data Policy</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h3>Direct Help Desk</h3>
+                    <ul class="contact-list">
+                        <li><i class="fas fa-location-dot"></i><span>Sector 81, Noida, Uttar Pradesh 201304</span></li>
+                        <li><i class="fas fa-phone"></i><span>+91 8532884450</span></li>
+                        <li><i class="fas fa-envelope"></i><span>prayanshukumar769@gmail.com</span></li>
+                        <li><i class="fas fa-clock"></i><span>24x7 Available</span></li>
+                    </ul>
+                    
+                    <h4 style="color:white; font-size:12px; margin-top:16px; margin-bottom:6px;">Supported Payment Partners</h4>
+                    <div class="payment-badges">
+                        <span class="pay-pill"><i class="fas fa-bolt" style="color:#0082fa;"></i> UPI / QR</span>
+                        <span class="pay-pill"><i class="fas fa-credit-card" style="color:#32a770;"></i> RuPay</span>
+                        <span class="pay-pill"><i class="fab fa-cc-visa" style="color:#6c5dd3;"></i> Visa</span>
+                        <span class="pay-pill"><i class="fab fa-cc-mastercard" style="color:#ff754c;"></i> Mastercard</span>
+                        <span class="pay-pill"><i class="fas fa-money-bill-wave" style="color:#e4e4e4;"></i> COD</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-bottom-wrap">
+                    <div>
+                        © 2026 <strong>ShopEase Retail Technologies Pvt. Ltd.</strong> All Rights Reserved.
+                    </div>
+                    <div style="display:flex; align-items:center; gap:16px;">
+                        <span class="ssl-badge"><i class="fas fa-lock"></i> 256-Bit SSL Encrypted Checkout</span>
+                        <span>ISO 27001 Certified System</span>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </main>
 
     <!-- PRODUCT DETAILS MODAL -->
@@ -504,7 +741,7 @@
                     <div class="form-group"><label>City</label><input type="text" id="addrCity" required placeholder="Noida"></div>
                     <div class="form-group"><label>State</label><input type="text" id="addrState" required placeholder="Uttar Pradesh"></div>
                 </div>
-                <div class="form-group"><label>Contact Phone</label><input type="tel" id="addrPhone" required placeholder="+91 9876543210"></div>
+                <div class="form-group"><label>Contact Phone</label><input type="tel" id="addrPhone" required placeholder="+91  8532884450"></div>
                 <button type="submit" class="btn-primary" style="margin-top:10px;">Save Address</button>
             </form>
         </div>
@@ -724,7 +961,6 @@
             }
         }
 
-        /* PROFILE IMAGE UPLOAD & OPTIMIZATION */
         function handleAvatarFileSelect(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -738,7 +974,6 @@
             reader.onload = function(e) {
                 const img = new Image();
                 img.onload = function() {
-                    // Resize to standard avatar dimensions (200x200) to keep base64 ultra lightweight
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     const size = 200;
@@ -752,7 +987,6 @@
                     ctx.drawImage(img, sx, sy, minEdge, minEdge, 0, 0, size, size);
                     stagedAvatarBase64 = canvas.toDataURL('image/jpeg', 0.85);
 
-                    // Immediate live preview
                     document.getElementById('settingsProfileImg').src = stagedAvatarBase64;
                     document.getElementById('profileAvatarUrl').value = '';
                 };
@@ -1011,6 +1245,8 @@
                 document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
                 element.classList.add('active');
             }
+            // Scroll content window up smoothly when switching tabs
+            document.querySelector('.main-content').scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function filterCategory(selectedCategory) {
